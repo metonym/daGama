@@ -1,0 +1,26 @@
+{
+  "name": "client",
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production bun server/app.ts",
+    "dev": "vite dev",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@ai-sdk/react": "^1.2.12",
+    "@tailwindcss/vite": "^4.1.8",
+    "@tanstack/react-query": "^5.79.0",
+    "@trpc/client": "^10.45.2",
+    "@vitejs/plugin-react": "^4.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^4.1.8",
+    "vite": "^6.3.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.15",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "typescript": "^5.8.3"
+  }
+}

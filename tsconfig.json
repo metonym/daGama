@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["packages/**/*"]
+}
