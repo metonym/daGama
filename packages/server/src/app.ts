@@ -1,6 +1,7 @@
 import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
+import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
@@ -12,6 +13,7 @@ const app = new Hono();
 
 if (NODE_ENV === "production") {
   if (SITE_URL) {
+    app.use(cors({ origin: SITE_URL }));
     app.use(csrf({ origin: new URL(SITE_URL).host }));
   }
 
