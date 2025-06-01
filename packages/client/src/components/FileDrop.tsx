@@ -6,7 +6,7 @@ import { DataInsights } from "./DataInsights";
 import { JsonViewer } from "./JsonViewer";
 import { DataStats, ProactiveDataAnalysis } from "./ProactiveDataAnalysis";
 import { SchemaInspector } from "./SchemaInspector";
-import { Label } from "./typography";
+import { Label, Subtitle, Subtitle2 } from "./typography";
 
 interface FileDropProps {
   onFileProcessed?: (data: unknown, schema: JsonSchema) => void;
@@ -304,7 +304,7 @@ export const FileDrop = ({
       {!processedFile ? (
         <div
           className={cx(
-            "py-8 text-left transition-colors",
+            "text-left transition-colors",
             isDragOver && !isProcessing ? "opacity-50" : "",
             isProcessing && "opacity-50",
           )}
@@ -344,10 +344,9 @@ export const FileDrop = ({
             </div>
           ) : (
             <div>
-              <p className="text-sm text-gray-600 mb-3 max-w-md leading-relaxed">
-                Drop your JSON file here for automatic data visualization and
-                schema inference. Large datasets are processed efficiently in
-                the background.{" "}
+              <p className="text-sm text-gray-600 mb-3 max-w-sm leading-relaxed">
+                Drop a JSON file here for automatic data visualization and
+                schema inference.{" "}
                 <button
                   type="button"
                   onClick={handleBrowseClick}
@@ -361,17 +360,15 @@ export const FileDrop = ({
           )}
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-12">
           {/* Header */}
+          <Subtitle2>Dataset</Subtitle2>
           <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <div>
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                Dataset
-              </div>
-              <h3 className="text-base font-semibold text-gray-900 font-mono">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-sm font-semibold text-gray-900 font-mono">
                 {processedFile.name}
               </h3>
-              <p className="text-sm text-gray-600 font-mono">
+              <p className="text-xs text-gray-600 font-mono">
                 {formatBytes(processedFile.size)} •{" "}
                 {processedFile.objectCount.toLocaleString()} objects
               </p>
@@ -380,18 +377,15 @@ export const FileDrop = ({
               <button
                 type="button"
                 onClick={clearFile}
-                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          {/* Instant Overview */}
+          {/* Static analysis */}
           <div>
-            <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
-              Instant Overview
-            </div>
             <DataStats
               data={
                 Array.isArray(processedFile.data)
@@ -404,15 +398,11 @@ export const FileDrop = ({
           {/* Schema and Raw Data */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
-                Schema
-              </div>
+              <Subtitle2>Schema</Subtitle2>
               <SchemaInspector schema={processedFile.schema} />
             </div>
             <div>
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
-                Data Preview
-              </div>
+              <Subtitle2>Data Preview</Subtitle2>
               <JsonViewer
                 data={processedFile.data}
                 objectCount={processedFile.objectCount}
@@ -423,9 +413,6 @@ export const FileDrop = ({
 
           {/* Data Insights */}
           <div>
-            <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
-              Data Insights
-            </div>
             <ProactiveDataAnalysis
               data={
                 Array.isArray(processedFile.data)
@@ -440,15 +427,13 @@ export const FileDrop = ({
           {/* AI Analysis */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="text-xs uppercase tracking-wide text-gray-500">
-                AI Analysis
-              </div>
               <button
                 type="button"
                 onClick={handleAnalyzeData}
                 disabled={analyzeLoading}
                 className={cx(
                   "px-3 py-1 text-xs font-medium border",
+                  !analyzeLoading && "hidden",
                   analyzeLoading
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
                     : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300",

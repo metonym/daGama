@@ -1,5 +1,7 @@
 import { cx } from "@/utils/cx";
 import { useMemo } from "react";
+import { DataTable } from "./DataTable";
+import { Subtitle2 } from "./typography";
 
 interface DataPoint {
   [key: string]: unknown;
@@ -416,18 +418,13 @@ const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
 const StatsCard = ({
   title,
   value,
-  subtitle,
 }: {
   title: string;
   value: string | number;
-  subtitle: string;
 }) => (
   <div>
-    <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-      {title}
-    </div>
+    <Subtitle2>{title}</Subtitle2>
     <div className="text-xl text-gray-900 mb-1 font-mono">{value}</div>
-    <div className="text-xs text-gray-500">{subtitle}</div>
   </div>
 );
 
@@ -470,26 +467,22 @@ export const DataStats = ({ data }: DataStatsProps) => {
   return (
     <div className="grid grid-cols-4 gap-4">
       <StatsCard
-        title="Records"
+        title="Total records"
         value={analysis.stats.totalRecords.toLocaleString()}
-        subtitle={"dataset"}
       />
       <StatsCard
-        title="Fields"
+        title="Unique fields"
         value={analysis.stats.totalFields}
-        subtitle={`${analysis.stats.numericFields} numeric, ${analysis.stats.stringFields} text`}
       />
       <StatsCard
-        title="Categories"
+        title="Total values"
         value={analysis.fieldAnalyses
           .reduce((sum, f) => sum + f.uniqueCount, 0)
           .toLocaleString()}
-        subtitle="unique values total"
       />
       <StatsCard
-        title="Completeness"
+        title="Data completeness"
         value={`${Math.round((1 - analysis.fieldAnalyses.reduce((sum, f) => sum + f.nullCount, 0) / (data.length * analysis.stats.totalFields)) * 100)}%`}
-        subtitle="complete fields"
       />
     </div>
   );
@@ -533,6 +526,59 @@ export const ProactiveDataAnalysis = ({
     };
   }, [data, semanticFields]);
 
+  const semanticFieldColumns = [
+    { id: "field", header: "Field & Description", span: 8 },
+    { id: "category", header: "Content Type", span: 2 },
+    {
+      id: "importance",
+      header: "Importance",
+      span: 2,
+      align: "right" as const,
+    },
+  ];
+
+  const renderSemanticFieldRow = (field: SemanticField, index: number) => [
+    // Field & Description
+    <div key="field-desc">
+      <div className="font-mono font-medium text-gray-900 text-xs">
+        {field.field}
+      </div>
+      <p className="text-xs text-gray-500 leading-relaxed">
+        {field.semanticMeaning}
+      </p>
+    </div>,
+    // Content Type
+    <span
+      key="category"
+      className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium"
+    >
+      {field.category}
+    </span>,
+    // Importance
+    <div
+      key="importance"
+      className="flex items-center gap-1.5"
+    >
+      <span
+        className={`inline-block w-1.5 h-1.5 rounded-full ${
+          field.importance === "high"
+            ? "bg-blue-500"
+            : field.importance === "medium"
+              ? "bg-gray-400"
+              : "bg-yellow-500"
+        }`}
+      />
+      <span className="text-xs text-gray-700 capitalize font-medium">
+        {field.importance}
+      </span>
+    </div>,
+  ];
+
+  const semanticFieldSortFn = (a: SemanticField, b: SemanticField) => {
+    const importanceOrder = { high: 3, medium: 2, low: 1 };
+    return importanceOrder[b.importance] - importanceOrder[a.importance];
+  };
+
   if (!analysis || !data.length) {
     return null;
   }
@@ -553,75 +599,15 @@ export const ProactiveDataAnalysis = ({
 
       {/* Field Suggestions - Show always when we have data */}
       <div className="max-w-3/4">
-        <div className="text-sm text-gray-600 font-medium mb-3">
-          Suggested properties for analysis:
-        </div>
+        <Subtitle2>Ranked properties</Subtitle2>
         {semanticFields && semanticFields.length > 0 ? (
-          <div className="bg-white border border-gray-200">
-            {/* Table Header */}
-            <div className="bg-gray-50 border-b border-gray-200 px-3 py-2">
-              <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-700 uppercase tracking-wide">
-                <div className="col-span-8">Field & Description</div>
-                <div className="col-span-2">Content Type</div>
-                <div className="col-span-2 text-right">Importance</div>
-              </div>
-            </div>
-            {/* Table Body */}
-            <div className="divide-y divide-gray-100">
-              {semanticFields
-                .sort((a, b) => {
-                  // Sort by importance: high > medium > low
-                  const importanceOrder = { high: 3, medium: 2, low: 1 };
-                  return (
-                    importanceOrder[b.importance] -
-                    importanceOrder[a.importance]
-                  );
-                })
-                .map((field) => (
-                  <div
-                    key={field.field}
-                    className="px-3 py-2"
-                  >
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                      {/* Field & Description */}
-                      <div className="col-span-8">
-                        <div className="font-mono font-medium text-gray-900 text-xs">
-                          {field.field}
-                        </div>
-                        <p className="text-xs text-gray-500 leading-relaxed">
-                          {field.semanticMeaning}
-                        </p>
-                      </div>
-
-                      {/* Content Type */}
-                      <div className="col-span-2">
-                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium">
-                          {field.category}
-                        </span>
-                      </div>
-
-                      {/* Importance */}
-                      <div className="col-span-2 flex justify-end">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`inline-block w-2 h-2 rounded-full ${
-                              field.importance === "high"
-                                ? "bg-blue-500"
-                                : field.importance === "medium"
-                                  ? "bg-gray-400"
-                                  : "bg-yellow-500"
-                            }`}
-                          />
-                          <span className="text-xs text-gray-700 capitalize font-medium">
-                            {field.importance}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
+          <DataTable
+            columns={semanticFieldColumns}
+            data={semanticFields}
+            renderRow={renderSemanticFieldRow}
+            keyExtractor={(field) => field.field}
+            sortFn={semanticFieldSortFn}
+          />
         ) : analysis.aggregations.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
             {(() => {
