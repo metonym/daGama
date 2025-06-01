@@ -1,6 +1,11 @@
 import { cx } from "@/utils/cx";
 import { useCallback, useMemo, useState } from "react";
-import { Virtuoso } from "react-virtuoso";
+import {
+  ExpandButton,
+  type TreeItem,
+  TreeViewer,
+  TypeBadge,
+} from "./TreeViewer";
 
 interface JsonViewerProps {
   data: unknown;
@@ -9,25 +14,17 @@ interface JsonViewerProps {
   fileSize?: number;
 }
 
-interface JsonItem {
-  id: string;
+interface JsonItem extends TreeItem {
   value: unknown;
   name?: string;
-  level: number;
-  isLast?: boolean;
   type: string;
-  hasChildren: boolean;
-  isExpanded: boolean;
   childCount?: number;
 }
 
-interface JsonItemProps {
-  item: JsonItem;
-  index: number;
-  onToggle: (id: string) => void;
-}
-
-const JsonItemComponent = ({ item, onToggle }: JsonItemProps) => {
+const JsonItemComponent = ({
+  item,
+  onToggle,
+}: { item: JsonItem; onToggle: (id: string) => void }) => {
   const getValueType = (val: unknown): string => {
     if (val === null) return "null";
     if (Array.isArray(val)) return "array";
@@ -76,13 +73,10 @@ const JsonItemComponent = ({ item, onToggle }: JsonItemProps) => {
           className="flex items-center"
         >
           {item.hasChildren && (
-            <button
-              type="button"
+            <ExpandButton
+              isExpanded={item.isExpanded}
               onClick={toggleExpand}
-              className="mr-1 text-gray-500 hover:text-gray-700 w-3 h-3 flex items-center justify-center text-xs"
-            >
-              {item.isExpanded ? "▼" : "▶"}
-            </button>
+            />
           )}
 
           {item.name && (
@@ -114,7 +108,7 @@ const ClosingBracket = ({
   level,
   isArray,
 }: { level: number; isArray: boolean }) => (
-  <div className="font-mono text-xs py-0.5 px-2 border-b border-gray-100">
+  <div className="font-mono text-[10px] py-0.5 px-2 border-b border-gray-100">
     <div
       style={{ marginLeft: `${level * 12}px` }}
       className="text-gray-600"
@@ -253,67 +247,64 @@ export const JsonViewer = ({
     });
   }, []);
 
-  return (
-    <div
-      className={cx(
-        "bg-white border border-gray-200 overflow-hidden h-96",
-        "scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100",
-      )}
-    >
-      {(objectCount !== undefined || fileSize !== undefined) && (
-        <div className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 p-2">
-          <div className="flex items-center gap-3 text-[10px] text-gray-600 font-mono">
-            {fileSize !== undefined && (
-              <div>
-                <span className="font-medium">Size:</span>{" "}
-                {formatBytes(fileSize)}
-              </div>
-            )}
-            <div>
-              <span className="font-medium">Type:</span>{" "}
-              <span className="ml-1 px-1 py-0.5 text-xs text-gray-600 bg-gray-200">
-                {Array.isArray(data) ? "array" : "object"}
-              </span>
-            </div>
-            {objectCount !== undefined && (
-              <div>
-                <span className="font-medium">Count:</span>{" "}
-                {objectCount.toLocaleString()}
-              </div>
-            )}
-            <div>
-              <span className="font-medium">Depth:</span> {depth}
-            </div>
-          </div>
-        </div>
-      )}
-      <Virtuoso
-        data={items}
-        style={{ height: Number.parseInt(maxHeight.replace("px", "")) || 400 }}
-        itemContent={(index, item) => {
-          if (item.type === "closing") {
-            // Find the original item to determine if it's an array or object
-            const originalItem = items.find(
-              (i) => i.id === item.id.replace("_close", ""),
-            );
-            return (
-              <ClosingBracket
-                level={item.level}
-                isArray={originalItem?.type === "array"}
-              />
-            );
-          }
+  const renderItem = useCallback(
+    (item: JsonItem, onToggle: (id: string) => void) => {
+      if (item.type === "closing") {
+        // Find the original item to determine if it's an array or object
+        const originalItem = items.find(
+          (i) => i.id === item.id.replace("_close", ""),
+        );
+        return (
+          <ClosingBracket
+            level={item.level}
+            isArray={originalItem?.type === "array"}
+          />
+        );
+      }
 
-          return (
-            <JsonItemComponent
-              item={item}
-              index={index}
-              onToggle={handleToggle}
-            />
-          );
-        }}
-        className="p-0"
-      />
-    </div>
+      return (
+        <JsonItemComponent
+          item={item}
+          onToggle={onToggle}
+        />
+      );
+    },
+    [items],
+  );
+
+  const headerContent =
+    objectCount !== undefined || fileSize !== undefined ? (
+      <div className="flex items-center gap-3 text-[10px] text-gray-600 font-mono">
+        {fileSize !== undefined && (
+          <div>
+            <span className="font-medium">Size:</span> {formatBytes(fileSize)}
+          </div>
+        )}
+        <div>
+          <span className="font-medium">Type:</span>{" "}
+          <TypeBadge type={Array.isArray(data) ? "array" : "object"} />
+        </div>
+        {objectCount !== undefined && (
+          <div>
+            <span className="font-medium">Count:</span>{" "}
+            {objectCount.toLocaleString()}
+          </div>
+        )}
+        <div>
+          <span className="font-medium">Depth:</span> {depth}
+        </div>
+      </div>
+    ) : undefined;
+
+  const height = Number.parseInt(maxHeight.replace("px", "")) || 400;
+
+  return (
+    <TreeViewer
+      items={items}
+      renderItem={renderItem}
+      onToggle={handleToggle}
+      headerContent={headerContent}
+      height={height}
+    />
   );
 };
