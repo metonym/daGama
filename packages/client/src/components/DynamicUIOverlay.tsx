@@ -259,7 +259,7 @@ export const DynamicUIOverlay = ({
     return (
       <div
         className={cx(
-          "absolute top-0 right-0 w-[42%] h-full bg-white/95 backdrop-blur-sm",
+          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
           "flex items-center justify-center p-8 transition-all duration-300",
           isVisible
             ? "opacity-100 translate-x-0"
@@ -283,8 +283,8 @@ export const DynamicUIOverlay = ({
   return (
     <div
       className={cx(
-        "absolute top-0 right-0 w-[42%] h-full bg-white/95 backdrop-blur-sm",
-        "flex flex-col transition-all duration-300 shadow-2xl",
+        "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
+        "flex flex-col transition-all duration-300",
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full",
       )}
     >
