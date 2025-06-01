@@ -1,15 +1,11 @@
-import { createOpenAI } from "@ai-sdk/openai";
+import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import type { Context } from "hono";
 import { stream } from "hono/streaming";
 
-const preamble = `You are a helpful AI assistant. Please provide clear and helpful responses to user questions.
-
+const preamble = `You are a helpful AI assistant.
+Please provide clear and helpful responses to user questions.
 `;
-
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function handleChat(c: Context) {
   const { prompt } = await c.req.json();

@@ -13,6 +13,10 @@ Build an LLM-assisted interface that helps users:
 
 - Ingest a large dataset
 - Understand the structure and content of the data
+- Visualize relationships between fields
+  - LLM prompt: "What are the most important relationships between fields?"
+  - LLM returns a list of fields and their relationships
+  - User can select a field and see a visualization of the relationship
 - Automatically generate relevant UI components to explore it
 - Iterate on the UI via natural language
 
