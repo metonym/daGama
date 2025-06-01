@@ -455,8 +455,8 @@ export const ProactiveDataAnalysis = ({
     <div className="space-y-12">
       {/* Data Analysis Explanation */}
       {analysis.aggregations.length > 0 && (
-        <div className="max-w-xl">
-          <p className="text-gray-700 font-serif text-xl">
+        <div className="max-w-2xl">
+          <p className="text-gray-700 font-serif text-2xl">
             The following visualizations emerge from an intelligent analysis of
             your dataset's structure and patterns. By examining field types,
             cardinality, and cross-relationships, the system identifies

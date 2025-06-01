@@ -33,7 +33,7 @@ export const Intro = () => {
       <div
         className={cx(
           "fixed top-0 right-0",
-          "w-[42%] h-full bg-cover bg-center bg-no-repeat",
+          "w-[28%] h-full bg-cover bg-center bg-no-repeat",
         )}
         style={{ backgroundImage: `url(${bgImage})` }}
       />
@@ -48,8 +48,8 @@ export const Intro = () => {
       )}
 
       {/* Content overlay */}
-      <div className="relative z-10 w-[calc(58%-2rem)] py-12">
-        <div className={cx("w-full max-w-4xl mx-auto gap-1", "flex flex-col")}>
+      <div className="relative z-10 w-[calc(72%-2rem)] py-12">
+        <div className={cx("w-full max-w-7xl mx-auto gap-1", "flex flex-col")}>
           <h1 className={cx("text-gray-900", "text-8xl font-serif")}>vasco</h1>
           <div className="text-2xl font-medium text-gray-500 mb-12">
             Design from data, in code.
