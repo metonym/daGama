@@ -434,9 +434,7 @@ export const DynamicUIOverlay = ({
         className={cx(
           "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
           "flex items-center justify-center p-8 duration-300",
-          isVisible
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 translate-x-full",
+          isVisible ? "opacity-100" : "opacity-0",
         )}
       >
         <div className="text-center">
@@ -454,9 +452,7 @@ export const DynamicUIOverlay = ({
         className={cx(
           "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
           "flex items-center justify-center p-8 duration-300",
-          isVisible
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 translate-x-full",
+          isVisible ? "opacity-100" : "opacity-0",
         )}
       >
         <div className="text-center">
@@ -483,9 +479,7 @@ export const DynamicUIOverlay = ({
         className={cx(
           "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
           "flex items-center justify-center p-8 duration-300",
-          isVisible
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 translate-x-full",
+          isVisible ? "opacity-100" : "opacity-0",
         )}
       >
         <div className="text-center">
@@ -509,7 +503,7 @@ export const DynamicUIOverlay = ({
       className={cx(
         "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
         "flex flex-col duration-300",
-        isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full",
+        isVisible ? "opacity-100" : "opacity-0",
       )}
     >
       {/* Header */}
