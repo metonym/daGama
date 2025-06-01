@@ -641,7 +641,7 @@ export const ProactiveDataAnalysis = ({
             })()}
           </div>
         ) : (
-          <div className="text-xs text-gray-500 italic">
+          <div className="text-xs text-gray-500">
             No semantic analysis available. Click "Analyze with AI" to get field
             insights.
           </div>

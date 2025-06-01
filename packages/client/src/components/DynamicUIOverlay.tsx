@@ -432,8 +432,8 @@ export const DynamicUIOverlay = ({
     return (
       <div
         className={cx(
-          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
-          "flex items-center justify-center p-8 transition-all duration-300",
+          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
+          "flex items-center justify-center p-8 duration-300",
           isVisible
             ? "opacity-100 translate-x-0"
             : "opacity-0 translate-x-full",
@@ -452,8 +452,8 @@ export const DynamicUIOverlay = ({
     return (
       <div
         className={cx(
-          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
-          "flex items-center justify-center p-8 transition-all duration-300",
+          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
+          "flex items-center justify-center p-8 duration-300",
           isVisible
             ? "opacity-100 translate-x-0"
             : "opacity-0 translate-x-full",
@@ -481,8 +481,8 @@ export const DynamicUIOverlay = ({
     return (
       <div
         className={cx(
-          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
-          "flex items-center justify-center p-8 transition-all duration-300",
+          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
+          "flex items-center justify-center p-8 duration-300",
           isVisible
             ? "opacity-100 translate-x-0"
             : "opacity-0 translate-x-full",
@@ -507,8 +507,8 @@ export const DynamicUIOverlay = ({
   return (
     <div
       className={cx(
-        "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
-        "flex flex-col transition-all duration-300",
+        "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/85 backdrop-blur-sm",
+        "flex flex-col duration-300",
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full",
       )}
     >
@@ -521,7 +521,7 @@ export const DynamicUIOverlay = ({
             </h3>
             <p className="text-xs text-gray-600 leading-relaxed">{question}</p>
             {visualizationResult?.visualization.rationale && (
-              <p className="text-xs text-gray-500 mt-1 italic">
+              <p className="text-xs text-gray-500 mt-1">
                 {visualizationResult.visualization.rationale}
               </p>
             )}
