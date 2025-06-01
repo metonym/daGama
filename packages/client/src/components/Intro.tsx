@@ -8,14 +8,35 @@ interface DataPoint {
   [key: string]: unknown;
 }
 
+interface InsightsData {
+  semanticAnalysis?: Array<{
+    field: string;
+    semanticMeaning: string;
+    dataType: string;
+    importance: "high" | "medium" | "low";
+    category: string;
+  }>;
+  visualizationRecommendations?: Array<{
+    fieldCombination: string[];
+    chartType: string;
+    rationale: string;
+    priority: "high" | "medium" | "low";
+  }>;
+}
+
 export const Intro = () => {
   const [overlayState, setOverlayState] = useState<{
     question: string;
     data: DataPoint[];
+    insights?: InsightsData;
   } | null>(null);
 
-  const handleQuestionSelect = (question: string, data: DataPoint[]) => {
-    setOverlayState({ question, data });
+  const handleQuestionSelect = (
+    question: string,
+    data: DataPoint[],
+    insights?: InsightsData,
+  ) => {
+    setOverlayState({ question, data, insights });
   };
 
   const handleCloseOverlay = () => {
@@ -52,6 +73,10 @@ export const Intro = () => {
         <DynamicUIOverlay
           question={overlayState.question}
           data={overlayState.data}
+          semanticFields={overlayState.insights?.semanticAnalysis}
+          visualizationRecommendations={
+            overlayState.insights?.visualizationRecommendations
+          }
           onClose={handleCloseOverlay}
         />
       )}

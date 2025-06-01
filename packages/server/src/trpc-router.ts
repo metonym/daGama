@@ -30,7 +30,7 @@ const DataInsightsSchema = z.object({
       dataType: z.string(),
       importance: z.enum(["high", "medium", "low"]),
       category: z.string(), // e.g., 'identifier', 'temporal', 'categorical', 'numerical', 'metadata'
-    }),
+    })
   ),
   visualizationRecommendations: z.array(
     z.object({
@@ -38,7 +38,7 @@ const DataInsightsSchema = z.object({
       chartType: z.string(),
       rationale: z.string(),
       priority: z.enum(["high", "medium", "low"]),
-    }),
+    })
   ),
   keyInsights: z.array(z.string()),
   dataQualityNotes: z.array(z.string()),
@@ -72,7 +72,7 @@ export const router = trpc.router({
         schema: SchemaPropertySchema,
         sampleData: z.array(z.record(z.unknown())).optional(),
         fileName: z.string().optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const { schema, sampleData, fileName } = input;
@@ -121,21 +121,49 @@ ${JSON.stringify(sampleData.slice(0, 3), null, 2)}
 `
         : "";
 
-      const prompt = `You are a data analysis expert. Analyze this dataset schema and provide insights for data visualization and exploration.
+      const prompt = `You are a data visualization and UI design expert. Analyze this dataset schema and provide insights for creating clean, minimal, and highly functional data interfaces.
 
 Dataset: ${fileName || "Unknown"}
 Schema Analysis:
 ${fieldsList}
 ${sampleDataText}
-Please provide a comprehensive analysis including:
-1. Semantic meaning of each field
-2. Data importance and categorization
-3. Visualization recommendations
-4. Key insights about the dataset
-5. Data quality observations
-6. Suggested questions for exploration
 
-Focus on practical insights that would help someone understand and visualize this data effectively.`;
+EXPLICIT UI DESIGN RULES:
+1. INFORMATION HIERARCHY: Structure suggestions from most to least important
+2. MONOCHROMATIC DESIGN: Focus on grays, blacks, and whites only
+3. COMPACT LAYOUTS: Prioritize information density over visual decoration
+4. SEMANTIC FIELD NAMING: Use clear, human-readable labels
+5. ACTIONABLE INSIGHTS: Every insight should lead to a specific action or exploration
+6. DATA-DRIVEN TITLES: Chart types should be specific to the data (e.g., "Revenue by Quarter" not "Bar Chart")
+7. PROGRESSIVE DISCLOSURE: Start with high-level patterns, allow drilling down
+8. TIMESTAMP FORMATTING: Convert all time data to human-readable formats (e.g., "2h 30m" not "9000000ms")
+
+VISUALIZATION QUALITY STANDARDS:
+- Chart types must be appropriate for data types (don't suggest pie charts for continuous data)
+- Field combinations should reveal meaningful relationships, not arbitrary pairings
+- Rationales must explain WHY this visualization helps answer business questions
+- Priority should reflect actual analytical value, not visual appeal
+
+SUGGESTED QUESTIONS CRITERIA:
+- Questions should be answerable with the available data
+- Focus on business insights, patterns, and anomalies
+- Use natural language that non-technical users understand
+- Prioritize questions that reveal actionable insights
+
+DATA QUALITY FOCUS:
+- Identify missing data patterns that affect analysis
+- Note data inconsistencies that impact visualization accuracy
+- Suggest data cleaning steps when relevant
+
+Provide comprehensive analysis including:
+1. Semantic meaning of each field with business context
+2. Data importance ranking based on analytical value
+3. Visualization recommendations with specific implementation details
+4. Key insights that drive decision-making
+5. Data quality observations that affect reliability
+6. Suggested questions that unlock business value
+
+Focus on creating interfaces that help users discover meaningful patterns and make data-driven decisions efficiently.`;
 
       const result = await generateObject({
         model: openai("gpt-4o"),

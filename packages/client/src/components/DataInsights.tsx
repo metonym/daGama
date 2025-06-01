@@ -1,4 +1,5 @@
 import { Badge } from "./Badge";
+import { Subtitle2 } from "./typography";
 
 interface DataInsight {
   semanticAnalysis: Array<{
@@ -56,12 +57,9 @@ export const DataInsights = ({
           <div className="space-y-8">
             {/* Key Insights Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2 uppercase tracking-wide">
-                Key Insights
-              </h3>
+              <Subtitle2>Key Insights</Subtitle2>
               <p className="text-sm text-gray-600 mb-4">
-                AI-discovered patterns, anomalies, and notable observations from
-                your dataset.
+                Notable patterns, anomalies, and observations from your dataset.
               </p>
 
               <div className="grid grid-cols-6 gap-3">
@@ -81,9 +79,7 @@ export const DataInsights = ({
             {/* Data Quality Notes Section */}
             {insights.dataQualityNotes.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2 uppercase tracking-wide">
-                  Data Quality Notes
-                </h3>
+                <Subtitle2>Data Quality Notes</Subtitle2>
                 <p className="text-sm text-gray-600 mb-4">
                   Important observations about data completeness, accuracy, and
                   potential issues.
@@ -105,9 +101,7 @@ export const DataInsights = ({
 
             {/* Visualization Recommendations Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2 uppercase tracking-wide">
-                Visualization Recommendations
-              </h3>
+              <Subtitle2>Visualization Recommendations</Subtitle2>
               <p className="text-sm text-gray-600 mb-4">
                 Chart types and field combinations that best reveal patterns in
                 your data.
@@ -145,9 +139,7 @@ export const DataInsights = ({
 
             {/* Suggested Questions Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2 uppercase tracking-wide">
-                Suggested Questions
-              </h3>
+              <Subtitle2>Suggested Questions</Subtitle2>
               <p className="text-sm text-gray-600 mb-4">
                 Analytical questions that could reveal deeper insights from your
                 data.

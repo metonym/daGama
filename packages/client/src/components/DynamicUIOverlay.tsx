@@ -5,10 +5,27 @@ interface DataPoint {
   [key: string]: unknown;
 }
 
+interface SemanticField {
+  field: string;
+  semanticMeaning: string;
+  dataType: string;
+  importance: "high" | "medium" | "low";
+  category: string;
+}
+
+interface VisualizationRecommendation {
+  fieldCombination: string[];
+  chartType: string;
+  rationale: string;
+  priority: "high" | "medium" | "low";
+}
+
 interface DynamicUIOverlayProps {
   question: string;
   data: DataPoint[];
   onClose: () => void;
+  semanticFields?: SemanticField[];
+  visualizationRecommendations?: VisualizationRecommendation[];
 }
 
 interface AggregatedData {
@@ -18,70 +35,107 @@ interface AggregatedData {
   percentage?: number;
 }
 
-// Data processing utilities
-const processDataForQuestion = (
+// Smart data processing using LLM insights
+const processDataWithInsights = (
+  question: string,
+  data: DataPoint[],
+  semanticFields?: SemanticField[],
+  visualizationRecommendations?: VisualizationRecommendation[],
+): AggregatedData[] => {
+  const questionLower = question.toLowerCase();
+
+  // First, try to match with LLM visualization recommendations
+  if (visualizationRecommendations?.length) {
+    const matchingRec = visualizationRecommendations.find((rec) =>
+      rec.fieldCombination.some(
+        (field) =>
+          questionLower.includes(field.toLowerCase()) ||
+          field.toLowerCase().includes(questionLower.split(" ")[0]),
+      ),
+    );
+
+    if (matchingRec && matchingRec.fieldCombination.length >= 1) {
+      const groupField = matchingRec.fieldCombination[0];
+      const valueField = matchingRec.fieldCombination[1];
+
+      if (valueField && data[0]?.[valueField] !== undefined) {
+        return aggregateByField(data, groupField, valueField);
+      }
+      return aggregateByFrequency(data, groupField);
+    }
+  }
+
+  // Use semantic field analysis to find relevant fields
+  if (semanticFields?.length) {
+    // Find fields that match the question intent
+    const relevantFields = semanticFields.filter(
+      (field) =>
+        questionLower.includes(field.field.toLowerCase()) ||
+        questionLower.includes(field.semanticMeaning.toLowerCase()) ||
+        field.category.toLowerCase().includes(questionLower.split(" ")[0]),
+    );
+
+    if (relevantFields.length > 0) {
+      // Prioritize by importance
+      const sortedFields = relevantFields.sort((a, b) => {
+        const importanceOrder = { high: 3, medium: 2, low: 1 };
+        return importanceOrder[b.importance] - importanceOrder[a.importance];
+      });
+
+      const primaryField = sortedFields[0];
+
+      // Find a numeric field to aggregate by if available
+      const numericFields = semanticFields.filter(
+        (f) => f.dataType === "number" && f.importance !== "low",
+      );
+
+      if (
+        numericFields.length > 0 &&
+        numericFields[0].field !== primaryField.field
+      ) {
+        return aggregateByField(
+          data,
+          primaryField.field,
+          numericFields[0].field,
+        );
+      }
+      return aggregateByFrequency(data, primaryField.field);
+    }
+  }
+
+  // Fallback to intelligent field detection
+  return intelligentFieldDetection(question, data);
+};
+
+const intelligentFieldDetection = (
   question: string,
   data: DataPoint[],
 ): AggregatedData[] => {
   const questionLower = question.toLowerCase();
-
-  // Spotify/Music data patterns
-  if (
-    questionLower.includes("artist") &&
-    (questionLower.includes("most") ||
-      questionLower.includes("top") ||
-      questionLower.includes("highest"))
-  ) {
-    return aggregateByField(data, "artistName", "msPlayed");
-  }
-
-  if (
-    questionLower.includes("track") &&
-    (questionLower.includes("most") ||
-      questionLower.includes("top") ||
-      questionLower.includes("highest"))
-  ) {
-    return aggregateByField(data, "trackName", "msPlayed");
-  }
-
-  if (questionLower.includes("time") && questionLower.includes("listening")) {
-    return aggregateByTimePattern(data, "endTime", "msPlayed");
-  }
-
-  if (questionLower.includes("genre") || questionLower.includes("category")) {
-    return aggregateByField(data, "artistName", "msPlayed"); // Fallback to artist for genre-like questions
-  }
-
-  // General patterns
-  if (
-    questionLower.includes("most frequent") ||
-    questionLower.includes("most common")
-  ) {
-    const fields = Object.keys(data[0] || {});
-    const stringField = fields.find((f) => typeof data[0]?.[f] === "string");
-    if (stringField) {
-      return aggregateByFrequency(data, stringField);
-    }
-  }
-
-  if (questionLower.includes("total") || questionLower.includes("sum")) {
-    const fields = Object.keys(data[0] || {});
-    const numericField = fields.find((f) => typeof data[0]?.[f] === "number");
-    if (numericField) {
-      return aggregateByField(
-        data,
-        fields.find((f) => typeof data[0]?.[f] === "string") || fields[0],
-        numericField,
-      );
-    }
-  }
-
-  // Default: return top categories by count
   const fields = Object.keys(data[0] || {});
+
+  // Try to find fields mentioned in the question
+  const mentionedField = fields.find((field) =>
+    questionLower.includes(field.toLowerCase()),
+  );
+
+  if (mentionedField) {
+    const numericFields = fields.filter(
+      (f) => typeof data[0]?.[f] === "number",
+    );
+    if (numericFields.length > 0 && numericFields[0] !== mentionedField) {
+      return aggregateByField(data, mentionedField, numericFields[0]);
+    }
+    return aggregateByFrequency(data, mentionedField);
+  }
+
+  // Default: use the first string field
   const stringField =
     fields.find((f) => typeof data[0]?.[f] === "string") || fields[0];
   return aggregateByFrequency(data, stringField);
 };
+
+// Data processing utilities
 
 const aggregateByField = (
   data: DataPoint[],
@@ -236,9 +290,42 @@ const formatHumanTime = (value: number, label: string): string => {
   return formatValue(value);
 };
 
-const getChartTitle = (question: string): string => {
+const getChartTitle = (
+  question: string,
+  semanticFields?: SemanticField[],
+  visualizationRecommendations?: VisualizationRecommendation[],
+): string => {
   const questionLower = question.toLowerCase();
 
+  // Try to get title from matching visualization recommendation
+  if (visualizationRecommendations?.length) {
+    const matchingRec = visualizationRecommendations.find((rec) =>
+      rec.fieldCombination.some((field) =>
+        questionLower.includes(field.toLowerCase()),
+      ),
+    );
+
+    if (matchingRec) {
+      // Use the chart type but make it more specific
+      const primaryField = matchingRec.fieldCombination[0];
+      return `${matchingRec.chartType} - ${primaryField}`;
+    }
+  }
+
+  // Use semantic field analysis for better titles
+  if (semanticFields?.length) {
+    const relevantField = semanticFields.find(
+      (field) =>
+        questionLower.includes(field.field.toLowerCase()) ||
+        questionLower.includes(field.semanticMeaning.toLowerCase()),
+    );
+
+    if (relevantField) {
+      return relevantField.semanticMeaning || relevantField.field;
+    }
+  }
+
+  // Fallback to simple patterns
   if (questionLower.includes("artist")) return "Artists";
   if (questionLower.includes("track")) return "Tracks";
   if (questionLower.includes("time")) return "Time Patterns";
@@ -251,14 +338,25 @@ export const DynamicUIOverlay = ({
   question,
   data,
   onClose,
+  semanticFields,
+  visualizationRecommendations,
 }: DynamicUIOverlayProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   const processedData = useMemo(() => {
-    return processDataForQuestion(question, data);
-  }, [question, data]);
+    return processDataWithInsights(
+      question,
+      data,
+      semanticFields,
+      visualizationRecommendations,
+    );
+  }, [question, data, semanticFields, visualizationRecommendations]);
 
-  const chartTitle = getChartTitle(question);
+  const chartTitle = getChartTitle(
+    question,
+    semanticFields,
+    visualizationRecommendations,
+  );
 
   const handleClose = () => {
     setIsVisible(false);

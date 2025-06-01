@@ -13,6 +13,21 @@ interface FileDropProps {
   onQuestionSelect?: (
     question: string,
     data: Array<Record<string, unknown>>,
+    insights?: {
+      semanticAnalysis?: Array<{
+        field: string;
+        semanticMeaning: string;
+        dataType: string;
+        importance: "high" | "medium" | "low";
+        category: string;
+      }>;
+      visualizationRecommendations?: Array<{
+        fieldCombination: string[];
+        chartType: string;
+        rationale: string;
+        priority: "high" | "medium" | "low";
+      }>;
+    },
   ) => void;
   className?: string;
 }
@@ -452,9 +467,6 @@ export const FileDrop = ({
                     onFieldSelect={(field) => {
                       console.log("Selected field:", field);
                     }}
-                    onVisualizationSelect={(viz) => {
-                      console.log("Selected visualization:", viz);
-                    }}
                     onQuestionSelect={(question) => {
                       if (processedFile && onQuestionSelect) {
                         const dataArray = Array.isArray(processedFile.data)
@@ -462,7 +474,11 @@ export const FileDrop = ({
                               Record<string, unknown>
                             >)
                           : [processedFile.data as Record<string, unknown>];
-                        onQuestionSelect(question, dataArray);
+                        onQuestionSelect(question, dataArray, {
+                          semanticAnalysis: insights.semanticAnalysis,
+                          visualizationRecommendations:
+                            insights.visualizationRecommendations,
+                        });
                       }
                     }}
                   />
