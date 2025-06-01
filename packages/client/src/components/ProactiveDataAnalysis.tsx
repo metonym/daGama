@@ -230,7 +230,7 @@ const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
       return (
         <span className="text-[10px] font-medium text-gray-700">
           {prefix} {byWord}{" "}
-          <span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-700 font-mono">
+          <span className="inline-block px-1 py-0.5 bg-gray-200 text-gray-700 font-mono font-semibold">
             {field}
           </span>
         </span>
@@ -300,7 +300,7 @@ const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
 
   return (
     <div className="bg-white border border-gray-200">
-      <div className="px-3 py-1 border-b border-gray-100 bg-gray-50">
+      <div className="flex items-center px-3 py-1 border-b border-gray-100 bg-gray-50">
         {renderTitle(aggregation.title)}
       </div>
       <div className="p-3">

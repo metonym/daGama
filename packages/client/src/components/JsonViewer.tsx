@@ -66,8 +66,8 @@ const JsonItemComponent = ({
   };
 
   return (
-    <div className="font-mono text-[10px] py-0.5 px-2 hover:bg-gray-50 border-b border-gray-100">
-      <div className="flex items-start min-w-0">
+    <div className="font-mono text-[10px] h-5 px-2 hover:bg-gray-50 border-b border-gray-100 flex items-center">
+      <div className="flex items-start min-w-0 w-full">
         <div
           style={{ marginLeft: `${item.level * 12}px` }}
           className="flex items-center min-w-0 flex-1"
@@ -114,7 +114,7 @@ const ClosingBracket = ({
   level,
   isArray,
 }: { level: number; isArray: boolean }) => (
-  <div className="font-mono text-[10px] py-0.5 px-2 border-b border-gray-100">
+  <div className="font-mono text-[10px] h-5 px-2 border-b border-gray-100 flex items-center">
     <div
       style={{ marginLeft: `${level * 12}px` }}
       className="text-gray-600"
