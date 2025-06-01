@@ -67,10 +67,10 @@ const JsonItemComponent = ({
 
   return (
     <div className="font-mono text-[10px] py-0.5 px-2 hover:bg-gray-50 border-b border-gray-100">
-      <div className="flex items-start">
+      <div className="flex items-start min-w-0">
         <div
           style={{ marginLeft: `${item.level * 12}px` }}
-          className="flex items-center"
+          className="flex items-center min-w-0 flex-1"
         >
           {item.hasChildren && (
             <ExpandButton
@@ -80,23 +80,29 @@ const JsonItemComponent = ({
           )}
 
           {item.name && (
-            <span className="text-blue-800 mr-2">"{item.name}":</span>
+            <span className="text-blue-800 mr-2 flex-shrink-0">
+              "{item.name}":
+            </span>
           )}
 
           {isComplex ? (
-            <span>
-              <span className="text-gray-600">{isArray ? "[" : "{"}</span>
+            <div className="flex items-center min-w-0">
+              <span className="text-gray-600 flex-shrink-0">
+                {isArray ? "[" : "{"}
+              </span>
               {!item.isExpanded && (
-                <span className="text-gray-500 ml-1">{getPreview()}</span>
+                <>
+                  <span className="text-gray-500 ml-1 flex-shrink-0">
+                    {getPreview()}
+                  </span>
+                  <span className="text-gray-600 ml-1 flex-shrink-0">
+                    {isArray ? "]" : "}"}
+                  </span>
+                </>
               )}
-              {!item.isExpanded && (
-                <span className="text-gray-600 ml-1">
-                  {isArray ? "]" : "}"}
-                </span>
-              )}
-            </span>
+            </div>
           ) : (
-            renderValue(item.value)
+            <div className="min-w-0 truncate">{renderValue(item.value)}</div>
           )}
         </div>
       </div>

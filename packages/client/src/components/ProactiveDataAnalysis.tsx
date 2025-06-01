@@ -177,12 +177,12 @@ const formatValue = (
       const remainingHours = totalHours % 24;
       if (totalDays > 30) {
         // For very long periods, just show days
-        return `${totalDays}d`;
+        return `${totalDays.toLocaleString()}d`;
       }
       if (remainingHours > 0) {
-        return `${totalDays}d ${remainingHours}h`;
+        return `${totalDays.toLocaleString()}d ${remainingHours}h`;
       }
-      return `${totalDays}d`;
+      return `${totalDays.toLocaleString()}d`;
     }
 
     // For medium durations, show hours and minutes
@@ -190,64 +190,129 @@ const formatValue = (
       const remainingMinutes = totalMinutes % 60;
       if (totalHours > 24) {
         // For more than a day worth of hours, omit minutes
-        return `${totalHours}h`;
+        return `${totalHours.toLocaleString()}h`;
       }
       if (remainingMinutes > 0) {
-        return `${totalHours}h ${remainingMinutes}m`;
+        return `${totalHours.toLocaleString()}h ${remainingMinutes}m`;
       }
-      return `${totalHours}h`;
+      return `${totalHours.toLocaleString()}h`;
     }
 
     // For short durations, show minutes and seconds
     if (totalMinutes > 0) {
       const remainingSeconds = totalSeconds % 60;
       if (remainingSeconds > 0) {
-        return `${totalMinutes}m ${remainingSeconds}s`;
+        return `${totalMinutes.toLocaleString()}m ${remainingSeconds}s`;
       }
-      return `${totalMinutes}m`;
+      return `${totalMinutes.toLocaleString()}m`;
     }
 
-    return `${totalSeconds}s`;
+    return `${totalSeconds.toLocaleString()}s`;
   }
 
   if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-  return value.toString();
+  return value.toLocaleString();
 };
 
 const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
   const maxValue = Math.max(...aggregation.data.map((d) => d.value));
 
+  // Parse title to identify field names that should be styled as tags
+  const renderTitle = (title: string) => {
+    // Handle patterns like "Distribution by field" or "field1 by field2"
+    const parts = title.split(/\s+(by)\s+/);
+
+    if (parts.length === 3) {
+      // Pattern: "something by field"
+      const [prefix, byWord, field] = parts;
+      return (
+        <span className="text-[10px] font-medium text-gray-700">
+          {prefix} {byWord}{" "}
+          <span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-700 font-mono">
+            {field}
+          </span>
+        </span>
+      );
+    }
+
+    // Check if it starts with "Distribution by"
+    if (title.startsWith("Distribution by ")) {
+      const field = title.replace("Distribution by ", "");
+      return (
+        <span className="text-[10px] font-medium text-gray-700">
+          Distribution by{" "}
+          <span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-700 font-mono">
+            {field}
+          </span>
+        </span>
+      );
+    }
+
+    // Check for pattern "field by field"
+    const byIndex = title.indexOf(" by ");
+    if (byIndex !== -1) {
+      const firstField = title.substring(0, byIndex);
+      const secondField = title.substring(byIndex + 4);
+      return (
+        <span className="text-[10px] font-medium text-gray-700">
+          <span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-700 font-mono mr-1">
+            {firstField}
+          </span>
+          by{" "}
+          <span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-700 font-mono">
+            {secondField}
+          </span>
+        </span>
+      );
+    }
+
+    // Fallback: return as-is
+    return (
+      <span className="text-[10px] font-medium text-gray-700">{title}</span>
+    );
+  };
+
+  const renderValue = (item: { value: number; percentage?: number }) => {
+    if (aggregation.valueType === "duration") {
+      // For duration, only show the formatted time
+      return formatValue(item.value, aggregation.valueType);
+    }
+
+    if (item.percentage) {
+      // For count/sum with percentage, show both percentage and sum
+      return `${item.percentage}% (${formatValue(item.value, aggregation.valueType)})`;
+    }
+
+    // Fallback to just the formatted value
+    return formatValue(item.value, aggregation.valueType);
+  };
+
   return (
     <div className="bg-white border border-gray-200">
-      <div className="p-3 border-b border-gray-100 bg-gray-50">
-        <h3 className="font-medium text-gray-900 text-sm">
-          {aggregation.title}
-        </h3>
+      <div className="px-3 py-1 border-b border-gray-100 bg-gray-50">
+        {renderTitle(aggregation.title)}
       </div>
       <div className="p-3">
-        <div className="space-y-1">
+        <div className="space-y-3">
           {aggregation.data.slice(0, 6).map((item, index) => (
             <div
               key={`${item.label}-${index}`}
-              className="flex items-center gap-3"
+              className="space-y-1"
             >
-              <div
-                className="w-20 text-xs text-gray-600 truncate font-mono"
-                title={item.label}
-              >
-                {item.label}
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] text-gray-600 font-mono flex-1 min-w-0">
+                  {item.label}
+                </div>
+                <div className="text-[10px] text-gray-900 font-mono ml-2 flex-shrink-0">
+                  {renderValue(item)}
+                </div>
               </div>
-              <div className="flex-1 bg-gray-100 h-2 relative">
+              <div className="bg-gray-100 h-0.5 relative">
                 <div
-                  className="bg-blue-600 h-2"
+                  className="bg-blue-600 h-0.5"
                   style={{ width: `${(item.value / maxValue) * 100}%` }}
                 />
-              </div>
-              <div className="w-12 text-xs text-gray-900 text-right font-mono truncate">
-                {item.percentage
-                  ? `${item.percentage}%`
-                  : formatValue(item.value, aggregation.valueType)}
               </div>
             </div>
           ))}
@@ -266,14 +331,12 @@ const StatsCard = ({
   value: string | number;
   subtitle: string;
 }) => (
-  <div className="bg-white p-3">
-    <div className="text-2xl font-bold text-gray-900 mb-1 font-mono">
-      {value}
-    </div>
-    <div className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+  <div>
+    <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">
       {title}
     </div>
-    <div className="text-xs text-gray-500 mt-1">{subtitle}</div>
+    <div className="text-xl text-gray-900 mb-1 font-mono">{value}</div>
+    <div className="text-xs text-gray-500">{subtitle}</div>
   </div>
 );
 
@@ -315,13 +378,13 @@ export const ProactiveDataAnalysis = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-12">
       {/* Quick Stats */}
-      <div className="grid grid-cols-4 gap-px bg-gray-200">
+      <div className="grid grid-cols-4 gap-4">
         <StatsCard
           title="Records"
           value={analysis.stats.totalRecords.toLocaleString()}
-          subtitle={fileName || "dataset"}
+          subtitle={"dataset"}
         />
         <StatsCard
           title="Fields"
@@ -330,10 +393,9 @@ export const ProactiveDataAnalysis = ({
         />
         <StatsCard
           title="Categories"
-          value={analysis.fieldAnalyses.reduce(
-            (sum, f) => sum + f.uniqueCount,
-            0,
-          )}
+          value={analysis.fieldAnalyses
+            .reduce((sum, f) => sum + f.uniqueCount, 0)
+            .toLocaleString()}
           subtitle="unique values total"
         />
         <StatsCard

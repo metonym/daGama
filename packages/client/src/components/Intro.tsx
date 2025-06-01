@@ -52,7 +52,7 @@ export const Intro = () => {
         <div className={cx("w-full max-w-4xl mx-auto gap-1", "flex flex-col")}>
           <h1 className={cx("text-gray-900", "text-8xl font-serif")}>vasco</h1>
           <div className="text-2xl font-medium text-gray-900 mb-12">
-            Design from the shape of data
+            Designing from the shape of data
           </div>
         </div>
 
