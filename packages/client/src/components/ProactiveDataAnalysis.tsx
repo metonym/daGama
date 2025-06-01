@@ -595,7 +595,7 @@ export const ProactiveDataAnalysis = ({
 
                       {/* Content Type */}
                       <div className="col-span-2">
-                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium">
                           {field.category}
                         </span>
                       </div>
