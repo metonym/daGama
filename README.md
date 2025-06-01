@@ -1,101 +1,144 @@
-# daGama
+# vasco (daGama)
 
 > Design from data, in code.
 
-## Problem
+## Overview
 
-The "blank canvas" problem:  
-Users often have large, complex datasets but no clear starting point for visual exploration. Traditional tools require technical expertise to set up dashboards or charts.
+An LLM-assisted interface that transforms the "blank canvas" problem into an intuitive data exploration experience. Users can upload datasets, get LLM-driven analysis of semantic meaning, and get suggestions for visualizations.
 
-## Goal
+The motivation was personal: I wanted to quickly explore data and guide design decisions.
 
-Build an LLM-assisted interface that helps users:
+## Gallery
 
-- Ingest a large dataset
-- Understand the structure and content of the data
-- Visualize relationships between fields
-  - LLM prompt: "What are the most important relationships between fields?"
-  - LLM returns a list of fields and their relationships
-  - User can select a field and see a visualization of the relationship
-- Automatically generate relevant UI components to explore it
-- Iterate on the UI via natural language
+![Cover](./assets/cover.png)
+![Upload](./assets/data-load.png)
+![Analysis](./assets/data-fields.png)
+![Visualization](./assets/data-analysis.png)
+![Refinement](./assets/data-final.png)
 
-## Demo Narrative
+## Challenges
 
-1. User drags and drops a real dataset (e.g., BayWheels trip data)
-2. LLM analyzes the data schema and suggests visualizations
-3. User selects a suggested chart
-4. Chart renders live in the browser
-5. User types a follow-up prompt to refine it (e.g., "Make this a heatmap")
-6. LLM updates the chart configuration; UI updates dynamically
+- Be able to parse a large data file and returns insights quickly.
+- Provide the LLM with important metadata and context, since sending the entire file is not feasible.
 
-## Project Structure
+## Architecture
 
-### 1. Data Ingestion
+```mermaid
+graph LR
+    A[User] --> B[Data Upload]
+    B --> C[LLM Analysis]
+    C --> D[OpenAI API]
+    C --> E[Chart Generation]
+    E --> F[Interactive Visualization]
 
-- Implement file drag-and-drop zone (CSV and JSON support)
-- Parse the file locally
-- Infer schema: field names, data types, sample values
-- Display schema summary in UI
+    G[System prompt] --> C
+    C --> H[Chart Updates]
+    H --> F
 
-### 2. LLM-Powered Visualization Suggestions
+    subgraph "Frontend"
+        B
+        E
+        F
+        G
+    end
 
-- Send schema + sample data to GPT-4
-- Prompt LLM to suggest relevant visualizations
-- Display 2–3 suggestions as options with descriptions
+    subgraph "Backend"
+        C
+        H
+    end
 
-### 3. Initial UI Generation
+    subgraph "External"
+        D
+    end
+```
 
-- Upon user selection, LLM returns chart spec:
-  - Chart type (e.g., bar, line, map)
-  - Axis fields
-  - Filters or groupings
-  - Optional styling hints
+## Tech Stack
 
-### 4. Iterative Refinement via Natural Language
+### Frontend
 
-- Provide input box for user to modify the chart (e.g., "Color by user type")
-- LLM interprets prompt and modifies chart config
-- Live update of visualization
-- Optional: display diff between chart configs
+- **React** - UI framework
+- **TailwindCSS** - Styling
+- **TanStack Query** - Data fetching and caching
+- **tRPC** - Type-safe API client
+- **AI SDK React** - LLM integration
+
+### Backend
+
+- **Bun** - Runtime and package manager
+- **Hono** - Web framework
+- **tRPC** - Type-safe API server
+- **OpenAI API** - LLM integration
+- **Zod** - Schema validation
+
+## Core Features
+
+### Data Ingestion
+
+- Drag-and-drop JSON upload
+- Automatic schema inference
+
+### AI-Powered Visualization
+
+- LLM analyzes data structure and relationships
+- Generates contextual chart suggestions
+- Provides insights in natural language
+
+### Interactive Refinement
+
+- Natural language chart modifications
+- Live preview of changes
+- Transparent configuration updates
+
+## Demo Flow
+
+1. **Upload**: User drops a dataset (e.g., transportation data)
+2. **Analyze**: LLM examines schema and suggests relevant visualizations
+3. **Generate**: User selects a chart type, system renders live visualization
 
 ## Design Principles
 
-- **Design from Data**: UI components are generated based on actual data, not assumptions
-- **Human-in-the-Loop**: LLM acts as a co-designer, always awaiting user guidance
-- **Transparency**: Expose the schema, LLM responses, and config structures
-- **Pre-visualization**: Users can preview changes before applying them
-- **User Agency**: Every component is traceable to user input or dataset structure
+- **Data-Driven Design**: UI components generated from actual data structure
+- **Human-in-the-Loop**: LLM provides suggestions, user maintains control
+- **Transparency**: Expose schema analysis, LLM reasoning, and configuration changes
+- **Iterative**: Support continuous refinement through natural language
 
-- Drop data
-- Retrieve schema
-- Semantic analysis of each property from schema (seeded with example values)
+## Future Work
 
-- Typography: hierarchy, font, size, weight, color
-- Organization of info based on the semantic meaning (track start, track end)
-
-- Visualize relationships between fields
-  - Infer schema from LLM (backend)
-    - then visualize as graph on frontend
-- Visualize branching
-
-- User interaction
-
-  - Excluding fields, subset
-  - Asking questions
-
-  MCP (Spotify), or API
-
-  - Retrieving metadata and visuals
+- **MCP**: Use MCP to provide tools for external data (e.g., APIs for content)
+- **More direct user feedback**: Allow users to provide feedback on the analysis and visualizations, allowing suggestions and charts to be re-generated
 
 ---
 
-- 1. Click to regenerate a chart
-- 2. AI analysis should run immediately
-- 3. Generate UI in the right
+## Running the project
 
-Polish:
+First, create a `.env` file in the root directory with the following variables:
 
-- Skeleton loading state for backend calls
-- Loading state before all
-- Intro centered
+```bash
+OPENAI_API_KEY=your_openai_api_key
+```
+
+### Local development
+
+```bash
+# Install dependencies
+bun install
+
+# Start development server
+bun dev
+
+# Build for production
+bun run build
+
+# Start the server for production
+bun start
+```
+
+### Production build
+
+```bash
+# Build for production
+bun run build
+
+# Start the server for production
+bun start
+```
