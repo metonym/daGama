@@ -42,7 +42,7 @@ export const DataInsights = ({
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent mx-auto mb-3" />
-              <p className="text-sm text-gray-600">Analyzing data with AI...</p>
+              <p className="text-sm text-gray-600">Analyzing data...</p>
             </div>
           </div>
         )}
