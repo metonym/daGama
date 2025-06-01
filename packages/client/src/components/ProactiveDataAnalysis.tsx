@@ -5,9 +5,18 @@ interface DataPoint {
   [key: string]: unknown;
 }
 
+interface SemanticField {
+  field: string;
+  semanticMeaning: string;
+  dataType: string;
+  importance: "high" | "medium" | "low";
+  category: string;
+}
+
 interface ProactiveDataAnalysisProps {
   data: DataPoint[];
   fileName?: string;
+  semanticFields?: SemanticField[];
 }
 
 interface FieldAnalysis {
@@ -417,6 +426,7 @@ export const DataStats = ({ data }: DataStatsProps) => {
 export const ProactiveDataAnalysis = ({
   data,
   fileName,
+  semanticFields,
 }: ProactiveDataAnalysisProps) => {
   const analysis = useMemo(() => {
     if (!data.length) return null;
@@ -457,25 +467,86 @@ export const ProactiveDataAnalysis = ({
       {analysis.aggregations.length > 0 && (
         <div className="max-w-2xl">
           <p className="text-gray-700 font-serif text-2xl">
-            The following visualizations emerge from an intelligent analysis of
-            your dataset's structure and patterns. By examining field types,
-            cardinality, and cross-relationships, the system identifies
-            meaningful ways to slice and aggregate your data—revealing
-            distributions across categorical dimensions and surfacing
-            correlations between numeric and categorical fields. Each chart
-            represents a calculated hypothesis about what might be interesting
-            in your data, automatically surfacing insights that would otherwise
-            require manual exploration.
+            These charts show key patterns in your data. We automatically
+            analyze field types and relationships to suggest useful ways to
+            group and visualize your information.
           </p>
         </div>
       )}
 
-      {/* Field Suggestions */}
-      {analysis.aggregations.length > 0 && (
-        <div className="max-w-4xl">
-          <div className="text-sm text-gray-600 font-medium mb-3">
-            Suggested properties for analysis:
+      {/* Field Suggestions - Show always when we have data */}
+      <div className="max-w-4xl">
+        <div className="text-sm text-gray-600 font-medium mb-3">
+          Suggested properties for analysis:
+        </div>
+        {semanticFields && semanticFields.length > 0 ? (
+          <div className="bg-white border border-gray-200">
+            {/* Table Header */}
+            <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+              <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-700 uppercase tracking-wide">
+                <div className="col-span-8">Field & Description</div>
+                <div className="col-span-2">Content Type</div>
+                <div className="col-span-2 text-right">Importance</div>
+              </div>
+            </div>
+            {/* Table Body */}
+            <div className="divide-y divide-gray-100">
+              {semanticFields
+                .sort((a, b) => {
+                  // Sort by importance: high > medium > low
+                  const importanceOrder = { high: 3, medium: 2, low: 1 };
+                  return (
+                    importanceOrder[b.importance] -
+                    importanceOrder[a.importance]
+                  );
+                })
+                .slice(0, 8)
+                .map((field, index) => (
+                  <div
+                    key={field.field}
+                    className="px-4 py-3"
+                  >
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      {/* Field & Description */}
+                      <div className="col-span-8">
+                        <div className="font-mono font-medium text-gray-900 text-sm mb-1">
+                          {field.field}
+                        </div>
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          {field.semanticMeaning}
+                        </p>
+                      </div>
+
+                      {/* Content Type */}
+                      <div className="col-span-2">
+                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                          {field.category}
+                        </span>
+                      </div>
+
+                      {/* Importance */}
+                      <div className="col-span-2 flex justify-end">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-block w-2 h-2 rounded-full ${
+                              field.importance === "high"
+                                ? "bg-red-500"
+                                : field.importance === "medium"
+                                  ? "bg-yellow-500"
+                                  : "bg-gray-400"
+                            }`}
+                          />
+                          <span className="text-xs text-gray-700 capitalize font-medium">
+                            {field.importance}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
+        ) : analysis.aggregations.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
             {(() => {
               const extractedFields = new Set<string>();
@@ -508,8 +579,13 @@ export const ProactiveDataAnalysis = ({
                 ));
             })()}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-xs text-gray-500 italic">
+            No semantic analysis available. Click "Analyze with AI" to get field
+            insights.
+          </div>
+        )}
+      </div>
 
       {/* Aggregation Charts */}
       {analysis.aggregations.length > 0 && (

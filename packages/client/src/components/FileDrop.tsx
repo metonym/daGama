@@ -123,6 +123,14 @@ export const FileDrop = ({
 
                 setProcessedFile(processed);
                 onFileProcessed?.(data, schema);
+
+                // Automatically run AI analysis
+                setTimeout(() => {
+                  const sampleData = Array.isArray(data)
+                    ? (data.slice(0, 5) as Array<Record<string, unknown>>)
+                    : [data as Record<string, unknown>];
+                  analyzeSchema(schema, sampleData, processed.name);
+                }, 100);
               } catch (schemaError) {
                 setError("Failed to infer schema from parsed data");
               }
@@ -144,7 +152,7 @@ export const FileDrop = ({
         workerRef.current.terminate();
       }
     };
-  }, [onFileProcessed]);
+  }, [onFileProcessed, analyzeSchema]);
 
   const currentFileRef = useRef<File | null>(null);
 
@@ -191,6 +199,14 @@ export const FileDrop = ({
           setProcessedFile(processed);
           onFileProcessed?.(data, schema);
           setIsProcessing(false);
+
+          // Automatically run AI analysis
+          setTimeout(() => {
+            const sampleData = Array.isArray(data)
+              ? (data.slice(0, 5) as Array<Record<string, unknown>>)
+              : [data as Record<string, unknown>];
+            analyzeSchema(schema, sampleData, processed.name);
+          }, 100);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to process file");
@@ -198,7 +214,7 @@ export const FileDrop = ({
         setParseProgress(null);
       }
     },
-    [onFileProcessed],
+    [onFileProcessed, analyzeSchema],
   );
 
   const handleDrop = useCallback(
@@ -442,6 +458,7 @@ export const FileDrop = ({
                   : [processedFile.data as Record<string, unknown>]
               }
               fileName={processedFile.name}
+              semanticFields={insights?.semanticAnalysis}
             />
           </div>
 

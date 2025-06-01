@@ -87,3 +87,9 @@ Build an LLM-assisted interface that helps users:
   MCP (Spotify), or API
 
   - Retrieving metadata and visuals
+
+---
+
+- 1. Click to regenerate a chart
+- 2. AI analysis should run immediately
+- 3. Generate UI in the right

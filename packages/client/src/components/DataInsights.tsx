@@ -290,14 +290,6 @@ export const DataInsights = ({
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
-
-        {!isLoading && !error && !insights && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-gray-500">
-              Click "Analyze with AI" to get insights about your data
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
