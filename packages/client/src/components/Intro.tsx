@@ -32,7 +32,7 @@ export const Intro = () => {
       {/* Full width absolute background image */}
       <div
         className={cx(
-          "absolute top-0 right-0",
+          "fixed top-0 right-0",
           "w-[42%] h-full bg-cover bg-center bg-no-repeat",
         )}
         style={{ backgroundImage: `url(${bgImage})` }}
@@ -48,7 +48,7 @@ export const Intro = () => {
       )}
 
       {/* Content overlay */}
-      <div className="relative z-10 w-[58%] py-12">
+      <div className="relative z-10 w-[calc(58%-2rem)] py-12">
         <div className={cx("w-full max-w-4xl mx-auto gap-1", "flex flex-col")}>
           <h1 className={cx("text-gray-900", "text-8xl font-serif")}>vasco</h1>
           <div className="text-2xl font-medium text-gray-900 mb-12">
