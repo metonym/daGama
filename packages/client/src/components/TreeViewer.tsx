@@ -44,7 +44,7 @@ export const TypeBadge = ({
 }: { type: string; className?: string }) => (
   <span
     className={cx(
-      "px-1 py-0.5 text-[10px] font-medium",
+      "px-1 py-0.5 text-[8px] font-medium",
       getTypeColor(type),
       className,
     )}
@@ -100,7 +100,6 @@ export function TreeViewer<T extends TreeItem>({
         
         .tree-viewer-scrollbar::-webkit-scrollbar-thumb {
           background-color: transparent;
-          border-radius: 3px;
           transition: background-color 0.2s ease;
         }
         

@@ -361,8 +361,8 @@ export const FileDrop = ({
                 {processedFile.name}
               </h3>
               <p className="text-sm text-gray-600 font-mono">
-                {processedFile.objectCount.toLocaleString()} objects •{" "}
-                {formatBytes(processedFile.size)}
+                {formatBytes(processedFile.size)} •{" "}
+                {processedFile.objectCount.toLocaleString()} objects
               </p>
             </div>
             <div className="flex items-center gap-2">

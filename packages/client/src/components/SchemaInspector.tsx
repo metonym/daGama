@@ -34,10 +34,10 @@ const SchemaItemComponent = ({
 
   return (
     <div className="font-mono text-[10px] py-0.5 px-2 hover:bg-gray-50 border-b border-gray-100">
-      <div className="flex items-center">
+      <div className="flex items-center min-w-0">
         <div
           style={{ marginLeft: `${item.level * 12}px` }}
-          className="flex items-center"
+          className="flex items-center min-w-0 flex-1"
         >
           {item.hasChildren && (
             <ExpandButton
@@ -47,23 +47,30 @@ const SchemaItemComponent = ({
           )}
 
           {item.isArrayItems && (
-            <span className="text-gray-600 text-[10px] mr-2">Items:</span>
+            <span className="text-gray-600 text-[10px] mr-2 flex-shrink-0">
+              Items:
+            </span>
           )}
 
           {item.name && !item.isArrayItems && (
-            <span className="text-gray-800 mr-2 font-medium">{item.name}:</span>
+            <span className="text-gray-800 mr-2 font-medium flex-shrink-0">
+              {item.name}:
+            </span>
           )}
 
           <TypeBadge type={item.property.type} />
 
           {item.property.example !== undefined && (
-            <span className="ml-2 text-gray-500 text-[10px]">
+            <span
+              className="ml-2 text-gray-500 text-[10px] flex-shrink-0 truncate max-w-[200px]"
+              title={`e.g., ${JSON.stringify(item.property.example)}`}
+            >
               e.g., {JSON.stringify(item.property.example)}
             </span>
           )}
 
           {item.hasChildren && !item.isExpanded && item.childCount && (
-            <span className="ml-2 text-gray-500 text-[10px]">
+            <span className="ml-2 text-gray-500 text-[10px] flex-shrink-0">
               ({item.childCount}{" "}
               {item.childCount === 1 ? "property" : "properties"})
             </span>
