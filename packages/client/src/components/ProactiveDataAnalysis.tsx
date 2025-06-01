@@ -216,7 +216,8 @@ const formatValue = (
 };
 
 const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
-  const maxValue = Math.max(...aggregation.data.map((d) => d.value));
+  // Calculate total for percentage calculation if percentages aren't provided
+  const totalValue = aggregation.data.reduce((sum, d) => sum + d.value, 0);
 
   // Parse title to identify field names that should be styled as tags
   const renderTitle = (title: string) => {
@@ -288,6 +289,15 @@ const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
     return formatValue(item.value, aggregation.valueType);
   };
 
+  // Calculate percentage for bar width
+  const getBarWidth = (item: { value: number; percentage?: number }) => {
+    if (item.percentage !== undefined) {
+      return item.percentage;
+    }
+    // Calculate percentage based on total if not provided
+    return totalValue > 0 ? (item.value / totalValue) * 100 : 0;
+  };
+
   return (
     <div className="bg-white border border-gray-200">
       <div className="px-3 py-1 border-b border-gray-100 bg-gray-50">
@@ -308,10 +318,10 @@ const MiniBarChart = ({ aggregation }: { aggregation: AggregationResult }) => {
                   {renderValue(item)}
                 </div>
               </div>
-              <div className="bg-gray-100 h-0.5 relative">
+              <div className="bg-gray-100 h-0.5 relative w-full">
                 <div
                   className="bg-blue-600 h-0.5"
-                  style={{ width: `${(item.value / maxValue) * 100}%` }}
+                  style={{ width: `${getBarWidth(item)}%` }}
                 />
               </div>
             </div>

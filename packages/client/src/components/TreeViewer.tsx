@@ -75,7 +75,7 @@ export function TreeViewer<T extends TreeItem>({
   onToggle,
   headerContent,
   className,
-  height = 396,
+  height = 320,
 }: TreeViewerProps<T>) {
   return (
     <>
@@ -118,7 +118,7 @@ export function TreeViewer<T extends TreeItem>({
       `}</style>
       <div
         className={cx(
-          "bg-white border border-gray-200 overflow-hidden tree-viewer-scrollbar",
+          "bg-white border border-gray-200 overflow-hidden tree-viewer-scrollbar relative",
           className,
         )}
         style={{ height }}
@@ -136,6 +136,8 @@ export function TreeViewer<T extends TreeItem>({
           )}
           className="p-0"
         />
+        {/* Gradient overlay at the bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
       </div>
     </>
   );

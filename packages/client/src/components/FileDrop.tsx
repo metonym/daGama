@@ -397,7 +397,13 @@ export const FileDrop = ({
           </div>
 
           {/* Schema and Raw Data */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
+                Schema
+              </div>
+              <SchemaInspector schema={processedFile.schema} />
+            </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
                 Data Preview
@@ -407,12 +413,6 @@ export const FileDrop = ({
                 objectCount={processedFile.objectCount}
                 fileSize={processedFile.size}
               />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
-                Schema
-              </div>
-              <SchemaInspector schema={processedFile.schema} />
             </div>
           </div>
 

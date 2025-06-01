@@ -51,8 +51,8 @@ export const Intro = () => {
       <div className="relative z-10 w-[calc(58%-2rem)] py-12">
         <div className={cx("w-full max-w-4xl mx-auto gap-1", "flex flex-col")}>
           <h1 className={cx("text-gray-900", "text-8xl font-serif")}>vasco</h1>
-          <div className="text-2xl font-medium text-gray-900 mb-12">
-            Designing from the shape of data
+          <div className="text-2xl font-medium text-gray-500 mb-12">
+            Design from data, in code.
           </div>
         </div>
 

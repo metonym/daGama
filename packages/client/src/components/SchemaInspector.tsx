@@ -218,7 +218,7 @@ export const SchemaInspector = ({ schema }: SchemaInspectorProps) => {
       renderItem={renderItem}
       onToggle={handleToggle}
       headerContent={headerContent}
-      height={396}
+      height={320}
     />
   );
 };

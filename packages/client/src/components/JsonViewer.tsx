@@ -126,7 +126,7 @@ const ClosingBracket = ({
 
 export const JsonViewer = ({
   data,
-  maxHeight = "400px",
+  maxHeight = "320px",
   objectCount,
   fileSize,
 }: JsonViewerProps) => {
