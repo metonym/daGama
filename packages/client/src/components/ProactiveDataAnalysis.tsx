@@ -415,6 +415,64 @@ export const ProactiveDataAnalysis = ({
         />
       </div>
 
+      {/* Data Analysis Explanation */}
+      {analysis.aggregations.length > 0 && (
+        <div className="max-w-xl">
+          <p className="text-gray-700 font-serif text-xl">
+            The following visualizations emerge from an intelligent analysis of
+            your dataset's structure and patterns. By examining field types,
+            cardinality, and cross-relationships, the system identifies
+            meaningful ways to slice and aggregate your data—revealing
+            distributions across categorical dimensions and surfacing
+            correlations between numeric and categorical fields. Each chart
+            represents a calculated hypothesis about what might be interesting
+            in your data, automatically surfacing insights that would otherwise
+            require manual exploration.
+          </p>
+        </div>
+      )}
+
+      {/* Field Suggestions */}
+      {analysis.aggregations.length > 0 && (
+        <div className="max-w-4xl">
+          <div className="text-sm text-gray-600 font-medium mb-3">
+            Suggested properties for analysis:
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(() => {
+              const extractedFields = new Set<string>();
+
+              for (const agg of analysis.aggregations) {
+                // Extract fields from "Distribution by field" pattern
+                if (agg.title.startsWith("Distribution by ")) {
+                  const field = agg.title.replace("Distribution by ", "");
+                  extractedFields.add(field);
+                }
+                // Extract fields from "field1 by field2" pattern
+                else if (agg.title.includes(" by ")) {
+                  const parts = agg.title.split(" by ");
+                  if (parts.length === 2) {
+                    extractedFields.add(parts[0]);
+                    extractedFields.add(parts[1]);
+                  }
+                }
+              }
+
+              return Array.from(extractedFields)
+                .sort()
+                .map((field) => (
+                  <span
+                    key={field}
+                    className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-mono border border-blue-200 rounded"
+                  >
+                    {field}
+                  </span>
+                ));
+            })()}
+          </div>
+        </div>
+      )}
+
       {/* Aggregation Charts */}
       {analysis.aggregations.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
