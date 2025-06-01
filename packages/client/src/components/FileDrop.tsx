@@ -373,7 +373,7 @@ export const FileDrop = ({
               <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
                 Dataset
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 font-mono">
+              <h3 className="text-base font-semibold text-gray-900 font-mono">
                 {processedFile.name}
               </h3>
               <p className="text-sm text-gray-600 font-mono">
@@ -382,26 +382,6 @@ export const FileDrop = ({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleAnalyzeData}
-                disabled={analyzeLoading}
-                className={cx(
-                  "px-4 py-2 text-sm font-medium transition-colors border",
-                  analyzeLoading
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
-                    : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600",
-                )}
-              >
-                {analyzeLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin h-3 w-3 border border-white border-t-transparent" />
-                    Analyzing...
-                  </div>
-                ) : (
-                  "Analyze with AI"
-                )}
-              </button>
               <button
                 type="button"
                 onClick={clearFile}

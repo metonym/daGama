@@ -467,9 +467,10 @@ export const ProactiveDataAnalysis = ({
       {analysis.aggregations.length > 0 && (
         <div className="max-w-2xl">
           <p className="text-gray-700 font-serif text-2xl">
-            These charts show key patterns in your data. We automatically
-            analyze field types and relationships to suggest useful ways to
-            group and visualize your information.
+            Your data is analyzed to identify important fields by content type
+            and relevance. These rankings inform the visualizations below,
+            highlighting the most meaningful patterns and relationships in your
+            dataset.
           </p>
         </div>
       )}
@@ -482,7 +483,7 @@ export const ProactiveDataAnalysis = ({
         {semanticFields && semanticFields.length > 0 ? (
           <div className="bg-white border border-gray-200">
             {/* Table Header */}
-            <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+            <div className="bg-gray-50 border-b border-gray-200 px-3 py-2">
               <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-700 uppercase tracking-wide">
                 <div className="col-span-8">Field & Description</div>
                 <div className="col-span-2">Content Type</div>
@@ -500,19 +501,18 @@ export const ProactiveDataAnalysis = ({
                     importanceOrder[a.importance]
                   );
                 })
-                .slice(0, 8)
-                .map((field, index) => (
+                .map((field) => (
                   <div
                     key={field.field}
-                    className="px-4 py-3"
+                    className="px-3 py-2"
                   >
                     <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Field & Description */}
                       <div className="col-span-8">
-                        <div className="font-mono font-medium text-gray-900 text-sm mb-1">
+                        <div className="font-mono font-medium text-gray-900 text-xs">
                           {field.field}
                         </div>
-                        <p className="text-xs text-gray-600 leading-relaxed">
+                        <p className="text-xs text-gray-500 leading-relaxed">
                           {field.semanticMeaning}
                         </p>
                       </div>
