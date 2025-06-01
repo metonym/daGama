@@ -31,7 +31,7 @@ type WorkerResponse = ProgressMessage | CompleteMessage | PartialMessage;
 async function parseJsonStream(
   content: string,
   onProgress: (progress: number, processed: number, total: number) => void,
-  onPartial?: (items: unknown[], count: number) => void
+  onPartial?: (items: unknown[], count: number) => void,
 ): Promise<unknown> {
   const total = content.length;
   let processed = 0;
@@ -67,7 +67,7 @@ async function parseJsonStream(
     throw new Error(
       `Failed to parse JSON: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -75,7 +75,7 @@ async function parseJsonStream(
 async function parseArrayStream(
   content: string,
   onProgress: (progress: number, processed: number, total: number) => void,
-  onPartial?: (items: unknown[], count: number) => void
+  onPartial?: (items: unknown[], count: number) => void,
 ): Promise<unknown[]> {
   const total = content.length;
   let processed = 0;
@@ -185,7 +185,7 @@ async function parseArrayStream(
     throw new Error(
       `Failed to parse JSON array: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -198,7 +198,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
       const onProgress = (
         progress: number,
         processed: number,
-        total: number
+        total: number,
       ) => {
         self.postMessage({
           type: "progress",
@@ -219,7 +219,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
       const data = await parseJsonStream(
         fileContent,
         onProgress,
-        isArray ? onPartial : undefined
+        isArray ? onPartial : undefined,
       );
 
       self.postMessage({

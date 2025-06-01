@@ -1,12 +1,34 @@
+import { useDataAnalysis } from "@/hooks/useDataAnalysis";
 import { cx } from "@/utils/cx";
 import { type JsonSchema, inferJsonSchema } from "@/utils/schema-inference";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DataInsights } from "./DataInsights";
 import { JsonViewer } from "./JsonViewer";
+import { DataStats, ProactiveDataAnalysis } from "./ProactiveDataAnalysis";
 import { SchemaInspector } from "./SchemaInspector";
-import { Label } from "./typography";
+import { Subtitle2 } from "./typography";
 
 interface FileDropProps {
   onFileProcessed?: (data: unknown, schema: JsonSchema) => void;
+  onQuestionSelect?: (
+    question: string,
+    data: Array<Record<string, unknown>>,
+    insights?: {
+      semanticAnalysis?: Array<{
+        field: string;
+        semanticMeaning: string;
+        dataType: string;
+        importance: "high" | "medium" | "low";
+        category: string;
+      }>;
+      visualizationRecommendations?: Array<{
+        fieldCombination: string[];
+        chartType: string;
+        rationale: string;
+        priority: "high" | "medium" | "low";
+      }>;
+    },
+  ) => void;
   className?: string;
 }
 
@@ -26,7 +48,11 @@ interface ParseProgress {
   currentCount?: number;
 }
 
-export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
+export const FileDrop = ({
+  onFileProcessed,
+  onQuestionSelect,
+  className,
+}: FileDropProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [parseProgress, setParseProgress] = useState<ParseProgress | null>(
@@ -38,6 +64,15 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
+
+  // Add AI analysis hook
+  const {
+    insights,
+    loading: analyzeLoading,
+    error: analyzeError,
+    analyzeSchema,
+    clearInsights,
+  } = useDataAnalysis();
 
   // Initialize worker
   useEffect(() => {
@@ -103,6 +138,14 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
 
                 setProcessedFile(processed);
                 onFileProcessed?.(data, schema);
+
+                // Automatically run AI analysis
+                setTimeout(() => {
+                  const sampleData = Array.isArray(data)
+                    ? (data.slice(0, 5) as Array<Record<string, unknown>>)
+                    : [data as Record<string, unknown>];
+                  analyzeSchema(schema, sampleData, processed.name);
+                }, 100);
               } catch (schemaError) {
                 setError("Failed to infer schema from parsed data");
               }
@@ -124,7 +167,7 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
         workerRef.current.terminate();
       }
     };
-  }, [onFileProcessed]);
+  }, [onFileProcessed, analyzeSchema]);
 
   const currentFileRef = useRef<File | null>(null);
 
@@ -154,7 +197,7 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
           try {
             data = JSON.parse(text);
           } catch (parseError) {
-            throw new Error("Invalid JSON format");
+            throw new Error("Invalid format");
           }
 
           const schema = inferJsonSchema(data);
@@ -171,6 +214,14 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
           setProcessedFile(processed);
           onFileProcessed?.(data, schema);
           setIsProcessing(false);
+
+          // Automatically run AI analysis
+          setTimeout(() => {
+            const sampleData = Array.isArray(data)
+              ? (data.slice(0, 5) as Array<Record<string, unknown>>)
+              : [data as Record<string, unknown>];
+            analyzeSchema(schema, sampleData, processed.name);
+          }, 100);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to process file");
@@ -178,7 +229,7 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
         setParseProgress(null);
       }
     },
-    [onFileProcessed],
+    [onFileProcessed, analyzeSchema],
   );
 
   const handleDrop = useCallback(
@@ -193,7 +244,7 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
       );
 
       if (!jsonFile) {
-        setError("Please drop a JSON file");
+        setError("Please drop a file");
         return;
       }
 
@@ -230,10 +281,23 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
     setProcessedFile(null);
     setError(null);
     setParseProgress(null);
+    clearInsights(); // Clear analysis when clearing file
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }, []);
+  }, [clearInsights]);
+
+  // Add function to handle AI analysis
+  const handleAnalyzeData = useCallback(async () => {
+    if (!processedFile) return;
+
+    // Convert data to sample for analysis (take first few items if array)
+    const sampleData = Array.isArray(processedFile.data)
+      ? (processedFile.data.slice(0, 5) as Array<Record<string, unknown>>)
+      : [processedFile.data as Record<string, unknown>];
+
+    await analyzeSchema(processedFile.schema, sampleData, processedFile.name);
+  }, [processedFile, analyzeSchema]);
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -255,9 +319,9 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
       {!processedFile ? (
         <div
           className={cx(
-            "border-2 border-dashed py-12 px-4 text-center transition-colors",
-            isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-900/80",
-            isProcessing && "opacity-50 cursor-not-allowed",
+            "text-left transition-colors",
+            isDragOver && !isProcessing ? "opacity-50" : "",
+            isProcessing && "opacity-50",
           )}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -272,21 +336,21 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
           />
 
           {isProcessing ? (
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent" />
               <div className="text-center">
-                <p className="text-gray-600 font-medium">
-                  Processing JSON file...
+                <p className="text-gray-600 font-medium text-sm">
+                  Processing file...
                 </p>
                 {parseProgress && (
                   <div className="mt-2">
-                    <div className="w-64 bg-gray-200 rounded-full h-2 mx-auto">
+                    <div className="w-48 bg-gray-200 h-1 mx-auto">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-600 h-1 transition-all duration-300"
                         style={{ width: `${parseProgress.progress}%` }}
                       />
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 mt-1 font-mono">
                       {formatProgress(parseProgress)}
                     </p>
                   </div>
@@ -294,68 +358,158 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4">
-              <div>
-                <p className="text-xl font-medium text-gray-900 mb-2">
-                  Drop files here
-                </p>
-                <p className="max-w-lg text-gray-600 mb-4">
-                  We'll automatically visualize the data and infer its schema.{" "}
-                  {typeof Worker !== "undefined"
-                    ? "Files will be processed in the background for optimal performance"
-                    : "Note: Web Workers not supported - large files may cause temporary UI freezing"}
-                </p>
+            <div>
+              <p className="text-sm text-gray-600 mb-3 max-w-sm leading-relaxed">
+                Drop a file here for automatic data visualization and schema
+                inference.{" "}
                 <button
                   type="button"
                   onClick={handleBrowseClick}
-                  className={cx(
-                    "px-4 py-2 bg-blue-600 text-white hover:bg-blue-700",
-                    "transition-colors font-medium",
-                  )}
+                  className="text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium"
                 >
-                  Browse files
+                  Browse files.
                 </button>
-              </div>
+              </p>
             </div>
           )}
         </div>
       ) : (
-        <div className="space-y-20">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Files</Label>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  {processedFile.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {processedFile.objectCount.toLocaleString()} objects •{" "}
-                  {formatBytes(processedFile.size)}
-                </p>
-              </div>
+        <div className="space-y-12">
+          {/* Header */}
+          <Subtitle2>Dataset</Subtitle2>
+          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-sm font-semibold text-gray-900 font-mono">
+                {processedFile.name}
+              </h3>
+              <p className="text-xs text-gray-600 font-mono">
+                {formatBytes(processedFile.size)} •{" "}
+                {processedFile.objectCount.toLocaleString()} objects
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={clearFile}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
-            >
-              Clear
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={clearFile}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
+              >
+                Clear
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Static analysis */}
+          <div>
+            <DataStats
+              data={
+                Array.isArray(processedFile.data)
+                  ? (processedFile.data as Array<Record<string, unknown>>)
+                  : [processedFile.data as Record<string, unknown>]
+              }
+            />
+          </div>
+
+          {/* Schema and Raw Data */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <Label>Data Preview</Label>
+              <Subtitle2>Schema</Subtitle2>
+              <SchemaInspector schema={processedFile.schema} />
+            </div>
+            <div>
+              <Subtitle2>Data Preview</Subtitle2>
               <JsonViewer
                 data={processedFile.data}
                 objectCount={processedFile.objectCount}
                 fileSize={processedFile.size}
               />
             </div>
-            <div>
-              <Label>Schema</Label>
-              <SchemaInspector schema={processedFile.schema} />
+          </div>
+
+          {/* Data Insights */}
+          <div>
+            <ProactiveDataAnalysis
+              data={
+                Array.isArray(processedFile.data)
+                  ? (processedFile.data as Array<Record<string, unknown>>)
+                  : [processedFile.data as Record<string, unknown>]
+              }
+              fileName={processedFile.name}
+              semanticFields={insights?.semanticAnalysis}
+            />
+          </div>
+
+          {/* AI Analysis */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <button
+                type="button"
+                onClick={handleAnalyzeData}
+                disabled={analyzeLoading}
+                className={cx(
+                  "px-3 py-1 text-xs font-medium border",
+                  !analyzeLoading && "hidden",
+                  analyzeLoading
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300",
+                )}
+              >
+                {analyzeLoading ? "Analyzing..." : "Run Analysis"}
+              </button>
             </div>
+            {(insights || analyzeLoading || analyzeError) && (
+              <>
+                {insights && (
+                  <DataInsights
+                    insights={insights}
+                    isLoading={analyzeLoading}
+                    error={analyzeError}
+                    onFieldSelect={(field) => {
+                      console.log("Selected field:", field);
+                    }}
+                    onQuestionSelect={(question) => {
+                      if (processedFile && onQuestionSelect) {
+                        const dataArray = Array.isArray(processedFile.data)
+                          ? (processedFile.data as Array<
+                              Record<string, unknown>
+                            >)
+                          : [processedFile.data as Record<string, unknown>];
+                        onQuestionSelect(question, dataArray, {
+                          semanticAnalysis: insights.semanticAnalysis,
+                          visualizationRecommendations:
+                            insights.visualizationRecommendations,
+                        });
+                      }
+                    }}
+                  />
+                )}
+                {!insights && (analyzeLoading || analyzeError) && (
+                  <div className="bg-white border border-gray-200 h-80">
+                    <div className="bg-gray-50 border-b border-gray-200 p-3">
+                      <div className="text-sm font-medium text-gray-900">
+                        AI Data Analysis
+                      </div>
+                    </div>
+                    <div className="p-4 h-64 overflow-y-auto">
+                      {analyzeLoading && (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent mx-auto mb-3" />
+                            <p className="text-sm text-gray-600">
+                              Analyzing data...
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      {analyzeError && (
+                        <div className="p-3 bg-red-50 border border-red-200">
+                          <p className="text-sm text-red-600">{analyzeError}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}

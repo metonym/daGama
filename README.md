@@ -1,6 +1,6 @@
 # daGama
 
-> Design in code, from data.
+> Design from data, in code.
 
 ## Problem
 
@@ -87,3 +87,15 @@ Build an LLM-assisted interface that helps users:
   MCP (Spotify), or API
 
   - Retrieving metadata and visuals
+
+---
+
+- 1. Click to regenerate a chart
+- 2. AI analysis should run immediately
+- 3. Generate UI in the right
+
+Polish:
+
+- Skeleton loading state for backend calls
+- Loading state before all
+- Intro centered

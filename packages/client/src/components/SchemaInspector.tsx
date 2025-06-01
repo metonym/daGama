@@ -1,6 +1,10 @@
-import { cx } from "@/utils/cx";
 import { useCallback, useMemo, useState } from "react";
-import { Virtuoso } from "react-virtuoso";
+import {
+  ExpandButton,
+  type TreeItem,
+  TreeViewer,
+  TypeBadge,
+} from "./TreeViewer";
 
 interface SchemaProperty {
   type: string;
@@ -14,88 +18,58 @@ interface SchemaInspectorProps {
   schema: SchemaProperty;
 }
 
-interface SchemaItem {
-  id: string;
+interface SchemaItem extends TreeItem {
   property: SchemaProperty;
   name?: string;
-  level: number;
-  hasChildren: boolean;
-  isExpanded: boolean;
   childCount?: number;
   isArrayItems?: boolean;
 }
 
-interface SchemaItemProps {
-  item: SchemaItem;
-  index: number;
-  onToggle: (id: string) => void;
-}
-
-const getTypeColor = (type: string): string => {
-  switch (type) {
-    case "string":
-      return "text-green-600 bg-green-50";
-    case "number":
-    case "integer":
-      return "text-blue-600 bg-blue-50";
-    case "boolean":
-      return "text-purple-600 bg-purple-50";
-    case "array":
-      return "text-orange-600 bg-orange-50";
-    case "object":
-      return "text-pink-600 bg-pink-50";
-    case "null":
-      return "text-gray-600 bg-gray-50";
-    default:
-      return "text-gray-600 bg-gray-50";
-  }
-};
-
-const SchemaItemComponent = ({ item, onToggle }: SchemaItemProps) => {
+const SchemaItemComponent = ({
+  item,
+  onToggle,
+}: { item: SchemaItem; onToggle: (id: string) => void }) => {
   const toggleExpand = () => onToggle(item.id);
 
   return (
-    <div className="font-mono text-sm py-1 px-2 hover:bg-gray-100">
-      <div className="flex items-center">
+    <div className="font-mono text-[10px] h-5 px-2 hover:bg-gray-50 border-b border-gray-100 flex items-center">
+      <div className="flex items-center min-w-0 w-full">
         <div
-          style={{ marginLeft: `${item.level * 16}px` }}
-          className="flex items-center"
+          style={{ marginLeft: `${item.level * 12}px` }}
+          className="flex items-center min-w-0 flex-1"
         >
           {item.hasChildren && (
-            <button
-              type="button"
+            <ExpandButton
+              isExpanded={item.isExpanded}
               onClick={toggleExpand}
-              className="mr-2 text-gray-500 hover:text-gray-700 w-4 h-4 flex items-center justify-center"
-            >
-              {item.isExpanded ? "▼" : "▶"}
-            </button>
+            />
           )}
 
           {item.isArrayItems && (
-            <span className="text-gray-600 text-xs mr-2">Items:</span>
+            <span className="text-gray-600 text-[10px] mr-2 flex-shrink-0">
+              Items:
+            </span>
           )}
 
           {item.name && !item.isArrayItems && (
-            <span className="text-gray-800 mr-2 font-medium">{item.name}:</span>
+            <span className="text-gray-800 mr-2 font-medium flex-shrink-0">
+              {item.name}:
+            </span>
           )}
 
-          <span
-            className={cx(
-              "px-2 py-1 text-xs font-medium",
-              getTypeColor(item.property.type),
-            )}
-          >
-            {item.property.type}
-          </span>
+          <TypeBadge type={item.property.type} />
 
           {item.property.example !== undefined && (
-            <span className="ml-2 text-gray-500 text-xs">
+            <span
+              className="ml-2 text-gray-500 text-[10px] flex-shrink-0 truncate max-w-[200px]"
+              title={`e.g., ${JSON.stringify(item.property.example)}`}
+            >
               e.g., {JSON.stringify(item.property.example)}
             </span>
           )}
 
           {item.hasChildren && !item.isExpanded && item.childCount && (
-            <span className="ml-2 text-gray-500 text-xs">
+            <span className="ml-2 text-gray-500 text-[10px] flex-shrink-0">
               ({item.childCount}{" "}
               {item.childCount === 1 ? "property" : "properties"})
             </span>
@@ -211,47 +185,46 @@ export const SchemaInspector = ({ schema }: SchemaInspectorProps) => {
 
   const stats = getStats(schema);
 
-  return (
-    <div className="bg-gray-50 border overflow-hidden h-96">
-      <div className="p-4 pb-3 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <div>
-            <span className="font-medium">Type:</span>
-            <span
-              className={cx(
-                "ml-1 px-2 py-1 text-xs",
-                getTypeColor(schema.type),
-              )}
-            >
-              {schema.type}
-            </span>
-          </div>
-          {stats.totalProperties > 0 && (
-            <div>
-              <span className="font-medium">Properties:</span>{" "}
-              {stats.totalProperties}
-            </div>
-          )}
-          <div>
-            <span className="font-medium">Depth:</span> {stats.depth}
-          </div>
-        </div>
-      </div>
+  const renderItem = useCallback(
+    (item: SchemaItem, onToggle: (id: string) => void) => {
+      return (
+        <SchemaItemComponent
+          item={item}
+          onToggle={onToggle}
+        />
+      );
+    },
+    [],
+  );
 
-      <div style={{ height: "384px" }}>
-        <Virtuoso
-          data={items}
-          style={{ height: 384 }}
-          itemContent={(index, item) => (
-            <SchemaItemComponent
-              item={item}
-              index={index}
-              onToggle={handleToggle}
-            />
-          )}
-          className="p-2"
+  const headerContent = (
+    <div className="flex items-center gap-3 text-[10px] text-gray-600 font-mono">
+      <div>
+        <span className="font-medium">Type:</span>
+        <TypeBadge
+          type={schema.type}
+          className="ml-1"
         />
       </div>
+      {stats.totalProperties > 0 && (
+        <div>
+          <span className="font-medium">Properties:</span>{" "}
+          {stats.totalProperties}
+        </div>
+      )}
+      <div>
+        <span className="font-medium">Depth:</span> {stats.depth}
+      </div>
     </div>
+  );
+
+  return (
+    <TreeViewer
+      items={items}
+      renderItem={renderItem}
+      onToggle={handleToggle}
+      headerContent={headerContent}
+      height={320}
+    />
   );
 };
