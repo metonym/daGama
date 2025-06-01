@@ -154,24 +154,24 @@ const BarChart = ({ data }: { data: AggregatedData[] }) => {
   const maxValue = Math.max(...data.map((d) => d.value));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {data.map((item) => (
         <div
           key={`${item.label}-${item.value}`}
           className="flex items-center gap-3"
         >
           <div
-            className="w-32 text-sm text-gray-700 font-medium truncate"
+            className="w-24 text-xs text-gray-700 font-medium truncate"
             title={item.label || "Data item"}
           >
             {item.label}
           </div>
-          <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+          <div className="flex-1 bg-gray-200 h-2 relative">
             <div
-              className="bg-gradient-to-r from-blue-500 to-purple-600 h-6 rounded-full flex items-center justify-end pr-2"
+              className="bg-gray-800 h-2 flex items-center justify-end pr-1"
               style={{ width: `${(item.value / maxValue) * 100}%` }}
             >
-              <span className="text-white text-xs font-medium">
+              <span className="text-white text-[10px] font-medium">
                 {item.percentage
                   ? `${item.percentage}%`
                   : formatValue(item.value)}
@@ -186,31 +186,22 @@ const BarChart = ({ data }: { data: AggregatedData[] }) => {
 
 const MetricsGrid = ({ data }: { data: AggregatedData[] }) => {
   const totalValue = data.reduce((sum, item) => sum + item.value, 0);
-  const topItems = data.slice(0, 4);
 
   return (
-    <div className="grid grid-cols-2 gap-4 mb-6">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-        <div className="text-2xl font-bold text-blue-700">{data.length}</div>
-        <div className="text-sm text-blue-600">Total Categories</div>
+    <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="border border-gray-200 p-3">
+        <div className="text-lg font-medium text-gray-900">{data.length}</div>
+        <div className="text-xs text-gray-600 uppercase tracking-wide">
+          Categories
+        </div>
       </div>
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-        <div className="text-2xl font-bold text-green-700">
+      <div className="border border-gray-200 p-3">
+        <div className="text-lg font-medium text-gray-900">
           {formatValue(totalValue)}
         </div>
-        <div className="text-sm text-green-600">Total Value</div>
-      </div>
-      <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
-        <div className="text-2xl font-bold text-purple-700">
-          {topItems[0]?.label || "N/A"}
+        <div className="text-xs text-gray-600 uppercase tracking-wide">
+          Total
         </div>
-        <div className="text-sm text-purple-600">Top Item</div>
-      </div>
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-lg border border-orange-200">
-        <div className="text-2xl font-bold text-orange-700">
-          {topItems[0] ? formatValue(topItems[0].value) : "N/A"}
-        </div>
-        <div className="text-sm text-orange-600">Top Value</div>
       </div>
     </div>
   );
@@ -226,15 +217,34 @@ const formatValue = (value: number): string => {
   return value.toString();
 };
 
+const formatHumanTime = (value: number, label: string): string => {
+  // If label looks like a time (HH:MM format), return as is
+  if (label.includes(":")) {
+    return label;
+  }
+
+  // If value represents milliseconds (common in Spotify data), convert to hours/minutes
+  if (value > 1000000) {
+    const hours = Math.floor(value / (1000 * 60 * 60));
+    const minutes = Math.floor((value % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  }
+
+  return formatValue(value);
+};
+
 const getChartTitle = (question: string): string => {
   const questionLower = question.toLowerCase();
 
-  if (questionLower.includes("artist")) return "Top Artists";
-  if (questionLower.includes("track")) return "Top Tracks";
-  if (questionLower.includes("time")) return "Listening Patterns";
-  if (questionLower.includes("genre")) return "Genre Distribution";
+  if (questionLower.includes("artist")) return "Artists";
+  if (questionLower.includes("track")) return "Tracks";
+  if (questionLower.includes("time")) return "Time Patterns";
+  if (questionLower.includes("genre")) return "Categories";
 
-  return "Data Analysis";
+  return "Analysis";
 };
 
 export const DynamicUIOverlay = ({
@@ -267,11 +277,13 @@ export const DynamicUIOverlay = ({
         )}
       >
         <div className="text-center">
-          <p className="text-gray-600">No data available for this question.</p>
+          <p className="text-sm text-gray-600">
+            No data available for this question.
+          </p>
           <button
             type="button"
             onClick={handleClose}
-            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="mt-4 px-3 py-1 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             Close
           </button>
@@ -289,67 +301,56 @@ export const DynamicUIOverlay = ({
       )}
     >
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div className="p-4 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-sm font-medium text-gray-900 mb-1 uppercase tracking-wide">
               {chartTitle}
-            </h2>
-            <p className="text-sm text-gray-600 leading-relaxed max-w-md">
-              {question}
-            </p>
+            </h3>
+            <p className="text-xs text-gray-600 leading-relaxed">{question}</p>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-white/50"
+            className="text-gray-500 hover:text-gray-700 text-xs"
             aria-label="Close overlay"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            ✕
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 p-4 overflow-y-auto">
         <MetricsGrid data={processedData} />
 
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Detailed Breakdown
-          </h3>
+        <div className="border border-gray-200 p-3 mb-4">
+          <h4 className="text-xs font-medium text-gray-900 mb-3 uppercase tracking-wide">
+            Breakdown
+          </h4>
           <BarChart data={processedData} />
         </div>
 
-        {/* Insights */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h4 className="font-medium text-blue-900 mb-2">Key Insights</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>
-              • Top item: <strong>{processedData[0]?.label}</strong> with{" "}
-              {formatValue(processedData[0]?.value || 0)}
-            </li>
-            <li>
-              • Total items analyzed:{" "}
-              <strong>{data.length.toLocaleString()}</strong>
-            </li>
-            <li>
-              • Categories found: <strong>{processedData.length}</strong>
-            </li>
-          </ul>
+        {/* Summary */}
+        <div className="text-xs text-gray-600 space-y-1">
+          <div>
+            Top:{" "}
+            <span className="font-medium text-gray-900">
+              {processedData[0]?.label}
+            </span>
+          </div>
+          <div>
+            Items:{" "}
+            <span className="font-medium text-gray-900">
+              {data.length.toLocaleString()}
+            </span>
+          </div>
+          <div>
+            Categories:{" "}
+            <span className="font-medium text-gray-900">
+              {processedData.length}
+            </span>
+          </div>
         </div>
       </div>
     </div>
