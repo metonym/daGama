@@ -102,19 +102,19 @@ const generateAggregations = (
 ): AggregationResult[] => {
   const results: AggregationResult[] = [];
 
-  // Find likely grouping and value fields
-  const stringFields = fieldAnalyses.filter(
-    (f) => f.type === "string" && f.uniqueCount < data.length * 0.8,
+  // Basic fallback: show distributions for categorical fields
+  const categoricalFields = fieldAnalyses.filter(
+    (f) =>
+      f.type === "string" &&
+      f.uniqueCount < data.length * 0.8 &&
+      f.uniqueCount > 1,
   );
-  const numericFields = fieldAnalyses.filter((f) => f.type === "number");
 
-  // Generate aggregations for string fields (categorical analysis)
-  for (const stringField of stringFields.slice(0, 3)) {
-    // Limit to top 3
-    if (stringField.topValues && stringField.topValues.length > 1) {
+  for (const field of categoricalFields.slice(0, 4)) {
+    if (field.topValues && field.topValues.length > 1) {
       results.push({
-        title: `Distribution by ${stringField.field}`,
-        data: stringField.topValues.slice(0, 8).map((item) => ({
+        title: `Distribution by ${field.field}`,
+        data: field.topValues.slice(0, 8).map((item) => ({
           label: item.value,
           value: item.count,
           percentage: item.percentage,
@@ -124,40 +124,41 @@ const generateAggregations = (
     }
   }
 
-  // Generate aggregations by combining string and numeric fields
-  if (stringFields.length > 0 && numericFields.length > 0) {
-    for (const stringField of stringFields.slice(0, 2)) {
-      for (const numericField of numericFields.slice(0, 2)) {
-        const grouped: { [key: string]: number } = {};
+  // Add cross-field analysis: numeric aggregations by categorical fields
+  const numericFields = fieldAnalyses.filter((f) => f.type === "number");
 
-        for (const item of data) {
-          const key = String(item[stringField.field] || "Unknown");
-          const value = Number(item[numericField.field]) || 0;
-          grouped[key] = (grouped[key] || 0) + value;
-        }
+  for (const categoricalField of categoricalFields.slice(0, 2)) {
+    for (const numericField of numericFields.slice(0, 2)) {
+      const grouped: { [key: string]: number } = {};
 
-        const sortedData = Object.entries(grouped)
-          .map(([label, value]) => ({ label, value }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 8);
+      for (const item of data) {
+        const key = String(item[categoricalField.field] || "Unknown");
+        const value = Number(item[numericField.field]) || 0;
+        grouped[key] = (grouped[key] || 0) + value;
+      }
 
-        if (sortedData.length > 1) {
-          const isDuration =
-            numericField.field.toLowerCase().includes("ms") ||
-            numericField.field.toLowerCase().includes("duration") ||
-            numericField.field.toLowerCase().includes("time");
+      const sortedData = Object.entries(grouped)
+        .map(([label, value]) => ({ label, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 8);
 
-          results.push({
-            title: `${numericField.field} by ${stringField.field}`,
-            data: sortedData,
-            valueType: isDuration ? "duration" : "sum",
-          });
-        }
+      if (sortedData.length > 1) {
+        const isDuration =
+          numericField.field.toLowerCase().includes("ms") ||
+          numericField.field.toLowerCase().includes("duration") ||
+          numericField.field.toLowerCase().includes("time") ||
+          numericField.field.toLowerCase().includes("played");
+
+        results.push({
+          title: `${numericField.field} by ${categoricalField.field}`,
+          data: sortedData,
+          valueType: isDuration ? "duration" : "sum",
+        });
       }
     }
   }
 
-  return results.slice(0, 4); // Limit to 4 aggregations
+  return results.slice(0, 6);
 };
 
 const formatValue = (

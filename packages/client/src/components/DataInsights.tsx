@@ -27,6 +27,8 @@ interface DataInsightsProps {
     recommendation: DataInsight["visualizationRecommendations"][0],
   ) => void;
   onQuestionSelect?: (question: string) => void;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const getImportanceColor = (importance: "high" | "medium" | "low") => {
@@ -56,6 +58,8 @@ export const DataInsights = ({
   onFieldSelect,
   onVisualizationSelect,
   onQuestionSelect,
+  isLoading,
+  error,
 }: DataInsightsProps) => {
   const [activeTab, setActiveTab] = useState<
     "semantic" | "viz" | "insights" | "questions"
@@ -65,22 +69,22 @@ export const DataInsights = ({
     {
       id: "semantic" as const,
       label: "Field Analysis",
-      count: insights.semanticAnalysis.length,
+      count: insights?.semanticAnalysis.length,
     },
     {
       id: "viz" as const,
       label: "Visualizations",
-      count: insights.visualizationRecommendations.length,
+      count: insights?.visualizationRecommendations.length,
     },
     {
       id: "insights" as const,
       label: "Key Insights",
-      count: insights.keyInsights.length,
+      count: insights?.keyInsights.length,
     },
     {
       id: "questions" as const,
       label: "Questions",
-      count: insights.suggestedQuestions.length,
+      count: insights?.suggestedQuestions.length,
     },
   ];
 
@@ -129,7 +133,7 @@ export const DataInsights = ({
             role="tabpanel"
             id="semantic-panel"
           >
-            {insights.semanticAnalysis.map((analysis) => (
+            {insights?.semanticAnalysis.map((analysis) => (
               <button
                 key={analysis.field}
                 type="button"
@@ -172,7 +176,7 @@ export const DataInsights = ({
             role="tabpanel"
             id="viz-panel"
           >
-            {insights.visualizationRecommendations.map((rec, index) => (
+            {insights?.visualizationRecommendations.map((rec, index) => (
               <button
                 key={`${rec.chartType}-${rec.fieldCombination.join("-")}-${index}`}
                 type="button"
@@ -220,7 +224,7 @@ export const DataInsights = ({
             role="tabpanel"
             id="insights-panel"
           >
-            {insights.keyInsights.map((insight, index) => (
+            {insights?.keyInsights.map((insight, index) => (
               <div
                 key={`insight-${insight.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
                 className="p-3 bg-blue-50 border border-blue-200 rounded-lg"
@@ -239,7 +243,7 @@ export const DataInsights = ({
               </div>
             ))}
 
-            {insights.dataQualityNotes.length > 0 && (
+            {insights?.dataQualityNotes.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-sm font-medium text-gray-900 mb-2">
                   Data Quality Notes
@@ -273,7 +277,7 @@ export const DataInsights = ({
             role="tabpanel"
             id="questions-panel"
           >
-            {insights.suggestedQuestions.map((question, index) => (
+            {insights?.suggestedQuestions.map((question, index) => (
               <button
                 key={`question-${question.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
                 type="button"
@@ -293,6 +297,29 @@ export const DataInsights = ({
                 </div>
               </button>
             ))}
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
+              <p className="text-gray-600">Analyzing data with AI...</p>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {!isLoading && !error && !insights && (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">
+              Click "Analyze with AI" to get insights about your data
+            </p>
           </div>
         )}
       </div>

@@ -427,32 +427,33 @@ export const FileDrop = ({
             />
           </div>
 
-          {/* AI Analysis Results - Show last */}
-          {insights && (
-            <div className="space-y-6">
-              {/* AI Analysis - With analyze button */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    AI Data Analysis
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={handleAnalyzeData}
-                    disabled={analyzeLoading}
-                    className={cx(
-                      "px-4 py-2 rounded-lg font-medium",
-                      analyzeLoading
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-indigo-600 text-white hover:bg-indigo-700",
-                    )}
-                  >
-                    {analyzeLoading ? "Analyzing..." : "Analyze with AI"}
-                  </button>
-                </div>
-                {(insights || analyzeLoading || analyzeError) && (
+          {/* AI Analysis - Always show */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                AI Data Analysis
+              </h2>
+              <button
+                type="button"
+                onClick={handleAnalyzeData}
+                disabled={analyzeLoading}
+                className={cx(
+                  "px-4 py-2 rounded-lg font-medium",
+                  analyzeLoading
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700",
+                )}
+              >
+                {analyzeLoading ? "Analyzing..." : "Analyze with AI"}
+              </button>
+            </div>
+            {(insights || analyzeLoading || analyzeError) && (
+              <>
+                {insights && (
                   <DataInsights
                     insights={insights}
+                    isLoading={analyzeLoading}
+                    error={analyzeError}
                     onFieldSelect={(field) => {
                       console.log("Selected field:", field);
                       // TODO: Implement field selection behavior
@@ -474,9 +475,35 @@ export const FileDrop = ({
                     }}
                   />
                 )}
-              </div>
-            </div>
-          )}
+                {!insights && (analyzeLoading || analyzeError) && (
+                  <div className="bg-white border border-gray-200 overflow-hidden h-96">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-4">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        AI Data Analysis
+                      </h2>
+                    </div>
+                    <div className="p-4 h-80 overflow-y-auto">
+                      {analyzeLoading && (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
+                            <p className="text-gray-600">
+                              Analyzing data with AI...
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      {analyzeError && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-sm text-red-600">{analyzeError}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
 
           {/* Analysis Error */}
           {analyzeError && (
