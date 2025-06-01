@@ -383,7 +383,7 @@ export const FileDrop = ({
                     Analyzing...
                   </div>
                 ) : (
-                  "🤖 Analyze with AI"
+                  "Analyze with AI"
                 )}
               </button>
               <button
@@ -396,22 +396,7 @@ export const FileDrop = ({
             </div>
           </div>
 
-          {/* Proactive Data Analysis - Shows immediately */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              📊 Instant Data Overview
-            </h2>
-            <ProactiveDataAnalysis
-              data={
-                Array.isArray(processedFile.data)
-                  ? (processedFile.data as Array<Record<string, unknown>>)
-                  : [processedFile.data as Record<string, unknown>]
-              }
-              fileName={processedFile.name}
-            />
-          </div>
-
-          {/* Schema and Raw Data - Show immediately */}
+          {/* Schema and Raw Data - Show first */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <Label>Data Preview</Label>
@@ -427,14 +412,29 @@ export const FileDrop = ({
             </div>
           </div>
 
-          {/* AI Analysis Results */}
+          {/* Proactive Data Analysis - Show second */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Instant Data Overview
+            </h2>
+            <ProactiveDataAnalysis
+              data={
+                Array.isArray(processedFile.data)
+                  ? (processedFile.data as Array<Record<string, unknown>>)
+                  : [processedFile.data as Record<string, unknown>]
+              }
+              fileName={processedFile.name}
+            />
+          </div>
+
+          {/* AI Analysis Results - Show last */}
           {insights && (
             <div className="space-y-6">
               {/* AI Analysis - With analyze button */}
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
-                    🤖 AI Data Analysis
+                    AI Data Analysis
                   </h2>
                   <button
                     type="button"
@@ -447,7 +447,7 @@ export const FileDrop = ({
                         : "bg-indigo-600 text-white hover:bg-indigo-700",
                     )}
                   >
-                    {analyzeLoading ? "🤖 Analyzing..." : "🤖 Analyze with AI"}
+                    {analyzeLoading ? "Analyzing..." : "Analyze with AI"}
                   </button>
                 </div>
                 {(insights || analyzeLoading || analyzeError) && (
