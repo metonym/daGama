@@ -30,7 +30,7 @@ const DataInsightsSchema = z.object({
       dataType: z.string(),
       importance: z.enum(["high", "medium", "low"]),
       category: z.string(), // e.g., 'identifier', 'temporal', 'categorical', 'numerical', 'metadata'
-    })
+    }),
   ),
   visualizationRecommendations: z.array(
     z.object({
@@ -38,7 +38,7 @@ const DataInsightsSchema = z.object({
       chartType: z.string(),
       rationale: z.string(),
       priority: z.enum(["high", "medium", "low"]),
-    })
+    }),
   ),
   keyInsights: z.array(z.string()),
   dataQualityNotes: z.array(z.string()),
@@ -72,7 +72,7 @@ export const router = trpc.router({
         schema: SchemaPropertySchema,
         sampleData: z.array(z.record(z.unknown())).optional(),
         fileName: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { schema, sampleData, fileName } = input;

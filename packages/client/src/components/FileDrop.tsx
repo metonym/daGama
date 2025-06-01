@@ -6,7 +6,7 @@ import { DataInsights } from "./DataInsights";
 import { JsonViewer } from "./JsonViewer";
 import { DataStats, ProactiveDataAnalysis } from "./ProactiveDataAnalysis";
 import { SchemaInspector } from "./SchemaInspector";
-import { Label, Subtitle, Subtitle2 } from "./typography";
+import { Subtitle2 } from "./typography";
 
 interface FileDropProps {
   onFileProcessed?: (data: unknown, schema: JsonSchema) => void;

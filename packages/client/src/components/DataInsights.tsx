@@ -1,6 +1,4 @@
-import { cx } from "@/utils/cx";
 import { Badge } from "./Badge";
-import { DataTable } from "./DataTable";
 
 interface DataInsight {
   semanticAnalysis: Array<{
@@ -24,76 +22,17 @@ interface DataInsight {
 interface DataInsightsProps {
   insights: DataInsight;
   onFieldSelect?: (field: string) => void;
-  onVisualizationSelect?: (
-    recommendation: DataInsight["visualizationRecommendations"][0],
-  ) => void;
   onQuestionSelect?: (question: string) => void;
   isLoading: boolean;
   error: string | null;
 }
 
-const getPriorityColor = (priority: "high" | "medium" | "low") => {
-  switch (priority) {
-    case "high":
-      return "bg-emerald-100 text-emerald-800";
-    case "medium":
-      return "bg-blue-100 text-blue-800";
-    case "low":
-      return "bg-slate-100 text-slate-800";
-  }
-};
-
 export const DataInsights = ({
   insights,
-  onVisualizationSelect,
   onQuestionSelect,
   isLoading,
   error,
 }: DataInsightsProps) => {
-  const visualizationColumns = [
-    { id: "chart", header: "Chart Type, Fields & Rationale", span: 12 },
-    { id: "priority", header: "Priority", span: 0, align: "right" as const },
-  ];
-
-  const renderVisualizationRow = (
-    rec: DataInsight["visualizationRecommendations"][0],
-    index: number,
-  ) => [
-    // Chart Type, Fields & Rationale
-    <div key="chart-fields-rationale">
-      <div className="font-medium text-gray-900 mb-1">{rec.chartType}</div>
-      <div className="flex flex-wrap gap-1 mb-2">
-        {rec.fieldCombination.map((field) => (
-          <span
-            key={field}
-            className="px-1 py-0.5 text-xs bg-gray-100 text-gray-700 font-mono"
-          >
-            {field}
-          </span>
-        ))}
-      </div>
-      <p className="text-sm text-gray-600 leading-relaxed">{rec.rationale}</p>
-    </div>,
-    // Priority
-    <span
-      key="priority"
-      className={cx(
-        "px-2 py-1 text-xs font-medium",
-        getPriorityColor(rec.priority),
-      )}
-    >
-      {rec.priority}
-    </span>,
-  ];
-
-  const visualizationSortFn = (
-    a: DataInsight["visualizationRecommendations"][0],
-    b: DataInsight["visualizationRecommendations"][0],
-  ) => {
-    const priorityOrder = { high: 3, medium: 2, low: 1 };
-    return priorityOrder[b.priority] - priorityOrder[a.priority];
-  };
-
   return (
     <div>
       {/* Content */}

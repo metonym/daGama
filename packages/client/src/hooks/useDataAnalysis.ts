@@ -35,7 +35,7 @@ interface UseDataAnalysisResult {
   analyzeSchema: (
     schema: SchemaProperty,
     sampleData?: Array<Record<string, unknown>>,
-    fileName?: string
+    fileName?: string,
   ) => Promise<void>;
   clearInsights: () => void;
 }
@@ -49,7 +49,7 @@ export const useDataAnalysis = (): UseDataAnalysisResult => {
     async (
       schema: SchemaProperty,
       sampleData?: Array<Record<string, unknown>>,
-      fileName?: string
+      fileName?: string,
     ) => {
       setLoading(true);
       setError(null);
@@ -69,7 +69,7 @@ export const useDataAnalysis = (): UseDataAnalysisResult => {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   const clearInsights = useCallback(() => {

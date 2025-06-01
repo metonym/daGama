@@ -12,7 +12,10 @@
     "ignore": ["dist"],
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "error"
+      }
     }
   }
 }

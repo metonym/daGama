@@ -1,4 +1,3 @@
-import { cx } from "@/utils/cx";
 import { useMemo } from "react";
 import { DataTable } from "./DataTable";
 import { Subtitle2 } from "./typography";
