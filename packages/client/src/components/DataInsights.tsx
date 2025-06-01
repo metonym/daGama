@@ -62,13 +62,13 @@ export const DataInsights = ({
                 Notable patterns, anomalies, and observations from your dataset.
               </p>
 
-              <div className="grid grid-cols-6 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {insights.keyInsights.map((insight, index) => (
                   <div
                     key={`insight-${insight.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
                     className="bg-blue-50 border border-blue-200 p-3"
                   >
-                    <p className="text-xs text-blue-900 leading-relaxed">
+                    <p className="text-xs text-blue-900 leading-relaxed break-words">
                       {insight}
                     </p>
                   </div>
@@ -84,11 +84,11 @@ export const DataInsights = ({
                   Important observations about data completeness, accuracy, and
                   potential issues.
                 </p>
-                <div className="grid grid-cols-6 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   {insights.dataQualityNotes.map((note, index) => (
                     <div
                       key={`quality-${note.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
-                      className="bg-yellow-50 border border-yellow-200 p-3"
+                      className="bg-yellow-50 border border-yellow-200 p-3 break-words"
                     >
                       <p className="text-xs text-yellow-900 leading-relaxed">
                         {note}
@@ -107,11 +107,11 @@ export const DataInsights = ({
                 your data.
               </p>
 
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 {insights.visualizationRecommendations.map((rec, index) => (
                   <div
                     key={`${rec.chartType}-${rec.fieldCombination.join("-")}-${index}`}
-                    className="bg-green-50 border border-green-200 p-3 flex flex-col space-y-4"
+                    className="bg-green-50 border border-green-200 p-3 flex flex-col space-y-4 justify-between break-words"
                   >
                     <div>
                       <div className="font-medium text-gray-900 text-xs mb-2">
@@ -149,7 +149,7 @@ export const DataInsights = ({
                 {insights.suggestedQuestions.map((question, index) => (
                   <div
                     key={`question-${question.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
-                    className="flex items-center gap-3 p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 p-3 border border-gray-200 transition-colors"
                   >
                     <div className="flex-1">
                       <p className="text-sm text-gray-900 leading-relaxed">

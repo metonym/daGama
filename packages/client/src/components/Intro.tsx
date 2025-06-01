@@ -48,6 +48,7 @@ export const Intro = () => {
       className={cx(
         "min-h-screen w-[calc(72%)] p-12 relative",
         "outline outline-gray-200 outline-offset-[-1rem]",
+        "flex items-center",
       )}
     >
       {/* Full width absolute background image */}
@@ -82,11 +83,11 @@ export const Intro = () => {
       )}
 
       {/* Content overlay */}
-      <div className="relative z-10 w-full py-12">
+      <div className="relative z-10 w-full">
         <div className={cx("w-full max-w-7xl mx-auto gap-1", "flex flex-col")}>
           <h1 className={cx("text-gray-900", "text-8xl font-serif")}>vasco</h1>
           <div className="text-2xl font-medium text-gray-500 mb-12">
-            Design from data
+            Design from data, in code.
           </div>
         </div>
 

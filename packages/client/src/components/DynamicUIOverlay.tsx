@@ -1,5 +1,6 @@
 import { cx } from "@/utils/cx";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useVisualizationGeneration } from "../hooks/useVisualizationGeneration";
 
 interface DataPoint {
   [key: string]: unknown;
@@ -179,6 +180,32 @@ const aggregateByFrequency = (
     .slice(0, 10);
 };
 
+const aggregateByAverage = (
+  data: DataPoint[],
+  groupField: string,
+  valueField: string,
+): AggregatedData[] => {
+  const groups: { [key: string]: { sum: number; count: number } } = {};
+
+  for (const item of data) {
+    const key = String(item[groupField] || "Unknown");
+    const value = Number(item[valueField]) || 0;
+    if (!groups[key]) {
+      groups[key] = { sum: 0, count: 0 };
+    }
+    groups[key].sum += value;
+    groups[key].count += 1;
+  }
+
+  return Object.entries(groups)
+    .map(([label, { sum, count }]) => ({
+      label,
+      value: Math.round((sum / count) * 100) / 100, // Round to 2 decimal places
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+};
+
 const aggregateByTimePattern = (
   data: DataPoint[],
   timeField: string,
@@ -342,27 +369,114 @@ export const DynamicUIOverlay = ({
   visualizationRecommendations,
 }: DynamicUIOverlayProps) => {
   const [isVisible, setIsVisible] = useState(true);
+  const {
+    result: visualizationResult,
+    loading: generationLoading,
+    error: generationError,
+    generateVisualization,
+  } = useVisualizationGeneration();
 
-  const processedData = useMemo(() => {
-    return processDataWithInsights(
-      question,
-      data,
-      semanticFields,
+  // Generate visualization when component mounts
+  useEffect(() => {
+    const dataSample = data.slice(0, 100); // Use first 100 records for analysis
+    generateVisualization(question, dataSample, {
+      semanticAnalysis: semanticFields,
       visualizationRecommendations,
-    );
-  }, [question, data, semanticFields, visualizationRecommendations]);
-
-  const chartTitle = getChartTitle(
+    });
+  }, [
     question,
+    data,
     semanticFields,
     visualizationRecommendations,
-  );
+    generateVisualization,
+  ]);
+
+  // Process data based on LLM visualization spec
+  const processedData = useMemo(() => {
+    if (!visualizationResult) return [];
+
+    const { visualization } = visualizationResult;
+    const { primaryField, valueField, aggregationType } = visualization;
+
+    switch (aggregationType) {
+      case "sum":
+        if (valueField) {
+          return aggregateByField(data, primaryField, valueField);
+        }
+        return aggregateByFrequency(data, primaryField);
+
+      case "count":
+      case "frequency":
+        return aggregateByFrequency(data, primaryField);
+
+      case "average":
+        if (valueField) {
+          return aggregateByAverage(data, primaryField, valueField);
+        }
+        return aggregateByFrequency(data, primaryField);
+
+      default:
+        return aggregateByFrequency(data, primaryField);
+    }
+  }, [visualizationResult, data]);
+
+  const chartTitle = visualizationResult?.visualization.title || "Analysis";
 
   const handleClose = () => {
     setIsVisible(false);
     setTimeout(onClose, 300); // Allow animation to complete
   };
 
+  // Show loading state
+  if (generationLoading) {
+    return (
+      <div
+        className={cx(
+          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
+          "flex items-center justify-center p-8 transition-all duration-300",
+          isVisible
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 translate-x-full",
+        )}
+      >
+        <div className="text-center">
+          <div className="animate-spin h-6 w-6 border-2 border-gray-800 border-t-transparent mx-auto mb-3" />
+          <p className="text-sm text-gray-600">Generating visualization...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (generationError) {
+    return (
+      <div
+        className={cx(
+          "fixed top-4 right-4 w-[calc(28%-2rem)] h-[calc(100%-2rem)] bg-white/90 backdrop-blur-sm",
+          "flex items-center justify-center p-8 transition-all duration-300",
+          isVisible
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 translate-x-full",
+        )}
+      >
+        <div className="text-center">
+          <p className="text-sm text-gray-600 mb-4">
+            Failed to generate visualization
+          </p>
+          <p className="text-xs text-red-600 mb-4">{generationError}</p>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-3 py-1 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show no data state
   if (!processedData.length) {
     return (
       <div
@@ -406,6 +520,11 @@ export const DynamicUIOverlay = ({
               {chartTitle}
             </h3>
             <p className="text-xs text-gray-600 leading-relaxed">{question}</p>
+            {visualizationResult?.visualization.rationale && (
+              <p className="text-xs text-gray-500 mt-1 italic">
+                {visualizationResult.visualization.rationale}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -424,32 +543,41 @@ export const DynamicUIOverlay = ({
 
         <div className="border border-gray-200 p-3 mb-4">
           <h4 className="text-xs font-medium text-gray-900 mb-3 uppercase tracking-wide">
-            Breakdown
+            {visualizationResult?.visualization.chartType || "Breakdown"}
           </h4>
           <BarChart data={processedData} />
         </div>
 
-        {/* Summary */}
-        <div className="text-xs text-gray-600 space-y-1">
-          <div>
-            Top:{" "}
-            <span className="font-medium text-gray-900">
-              {processedData[0]?.label}
-            </span>
+        {/* LLM-Generated Summary */}
+        {visualizationResult?.summary && (
+          <div className="mb-4 p-3 border border-gray-200">
+            <h4 className="text-xs font-medium text-gray-900 mb-2 uppercase tracking-wide">
+              Summary
+            </h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              {visualizationResult.summary}
+            </p>
           </div>
-          <div>
-            Items:{" "}
-            <span className="font-medium text-gray-900">
-              {data.length.toLocaleString()}
-            </span>
-          </div>
-          <div>
-            Categories:{" "}
-            <span className="font-medium text-gray-900">
-              {processedData.length}
-            </span>
-          </div>
-        </div>
+        )}
+
+        {/* LLM-Generated Key Findings */}
+        {visualizationResult?.keyFindings &&
+          visualizationResult.keyFindings.length > 0 && (
+            <div className="text-xs text-gray-600 space-y-1">
+              <h4 className="font-medium text-gray-900 mb-2 uppercase tracking-wide">
+                Key Findings
+              </h4>
+              {visualizationResult.keyFindings.map((finding, index) => (
+                <div
+                  key={`finding-${finding.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
+                  className="flex items-start gap-2"
+                >
+                  <span className="text-gray-400">•</span>
+                  <span>{finding}</span>
+                </div>
+              ))}
+            </div>
+          )}
       </div>
     </div>
   );

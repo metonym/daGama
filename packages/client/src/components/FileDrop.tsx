@@ -197,7 +197,7 @@ export const FileDrop = ({
           try {
             data = JSON.parse(text);
           } catch (parseError) {
-            throw new Error("Invalid JSON format");
+            throw new Error("Invalid format");
           }
 
           const schema = inferJsonSchema(data);
@@ -244,7 +244,7 @@ export const FileDrop = ({
       );
 
       if (!jsonFile) {
-        setError("Please drop a JSON file");
+        setError("Please drop a file");
         return;
       }
 
@@ -340,7 +340,7 @@ export const FileDrop = ({
               <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent" />
               <div className="text-center">
                 <p className="text-gray-600 font-medium text-sm">
-                  Processing JSON file...
+                  Processing file...
                 </p>
                 {parseProgress && (
                   <div className="mt-2">
@@ -360,16 +360,15 @@ export const FileDrop = ({
           ) : (
             <div>
               <p className="text-sm text-gray-600 mb-3 max-w-sm leading-relaxed">
-                Drop a JSON file here for automatic data visualization and
-                schema inference.{" "}
+                Drop a file here for automatic data visualization and schema
+                inference.{" "}
                 <button
                   type="button"
                   onClick={handleBrowseClick}
                   className="text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium"
                 >
-                  Browse files
-                </button>{" "}
-                to get started.
+                  Browse files.
+                </button>
               </p>
             </div>
           )}

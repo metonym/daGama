@@ -45,6 +45,21 @@ const DataInsightsSchema = z.object({
   suggestedQuestions: z.array(z.string()),
 });
 
+// Schema for dynamic visualization generation
+const VisualizationGenerationSchema = z.object({
+  visualization: z.object({
+    title: z.string(),
+    chartType: z.string(),
+    primaryField: z.string(),
+    valueField: z.string().nullable().optional(),
+    aggregationType: z.enum(["sum", "count", "average", "frequency"]),
+    filterInstructions: z.string().optional(),
+    rationale: z.string(),
+  }),
+  summary: z.string(),
+  keyFindings: z.array(z.string()),
+});
+
 interface FieldInfo {
   field: string;
   type: string;
@@ -172,6 +187,149 @@ Focus on creating interfaces that help users discover meaningful patterns and ma
       });
 
       return result.object;
+    }),
+
+  generateVisualization: procedure
+    .input(
+      z.object({
+        question: z.string(),
+        dataSample: z.array(z.record(z.unknown())),
+        existingInsights: z
+          .object({
+            semanticAnalysis: z
+              .array(
+                z.object({
+                  field: z.string(),
+                  semanticMeaning: z.string(),
+                  dataType: z.string(),
+                  importance: z.enum(["high", "medium", "low"]),
+                  category: z.string(),
+                })
+              )
+              .optional(),
+            visualizationRecommendations: z
+              .array(
+                z.object({
+                  fieldCombination: z.array(z.string()),
+                  chartType: z.string(),
+                  rationale: z.string(),
+                  priority: z.enum(["high", "medium", "low"]),
+                })
+              )
+              .optional(),
+          })
+          .optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { question, dataSample, existingInsights } = input;
+
+      // Validate input data
+      if (!dataSample || dataSample.length === 0) {
+        throw new Error("No data provided for visualization");
+      }
+
+      if (!question || question.trim().length === 0) {
+        throw new Error("No question provided for visualization");
+      }
+
+      const fieldsInfo = Object.keys(dataSample[0] || {})
+        .map((field) => {
+          const sampleValue = dataSample[0][field];
+          const dataType = typeof sampleValue;
+          return `- ${field}: ${dataType} (e.g., ${JSON.stringify(
+            sampleValue
+          )})`;
+        })
+        .join("\n");
+
+      // Ensure we have fields to work with
+      if (!fieldsInfo) {
+        throw new Error("No fields found in data sample");
+      }
+
+      const existingContext = existingInsights
+        ? `
+EXISTING ANALYSIS CONTEXT:
+Semantic Fields: ${JSON.stringify(existingInsights.semanticAnalysis, null, 2)}
+Previous Recommendations: ${JSON.stringify(
+            existingInsights.visualizationRecommendations,
+            null,
+            2
+          )}
+`
+        : "";
+
+      const prompt = `You are a data visualization expert. Generate a specific, actionable visualization for this user question.
+
+USER QUESTION: "${question}"
+
+AVAILABLE DATA FIELDS:
+${fieldsInfo}
+
+SAMPLE DATA:
+${JSON.stringify(dataSample.slice(0, 3), null, 2)}
+${existingContext}
+
+VISUALIZATION REQUIREMENTS:
+1. MONOCHROMATIC DESIGN: Use only grays, blacks, and whites
+2. MINIMAL UI: Clean, focused on the data story
+3. SPECIFIC IMPLEMENTATION: Provide exact field names and aggregation methods
+4. HUMAN-READABLE: Convert timestamps, format numbers appropriately
+5. BUSINESS VALUE: Focus on actionable insights, not just pretty charts
+
+CRITICAL: You must respond with a JSON object that exactly matches this structure:
+
+{
+  "visualization": {
+    "title": "Descriptive chart title (e.g., 'Revenue by Product Category')",
+    "chartType": "Specific chart type (e.g., 'Bar Chart', 'Line Chart', 'Frequency Analysis')",
+    "primaryField": "exact_field_name_from_data",
+    "valueField": "exact_numeric_field_name_or_null",
+    "aggregationType": "sum|count|average|frequency",
+    "filterInstructions": "Optional filtering guidance",
+    "rationale": "Clear explanation of why this visualization answers the question"
+  },
+  "summary": "2-3 sentence summary of what this visualization reveals",
+  "keyFindings": [
+    "Finding 1 that would be visible in this chart",
+    "Finding 2 based on the data patterns",
+    "Finding 3 highlighting actionable insights"
+  ]
+}
+
+RESPONSE GUIDELINES:
+- primaryField: Must be an exact field name from the available data
+- valueField: Only specify if doing sum/average aggregation on numeric data
+- aggregationType: Must be exactly one of: "sum", "count", "average", "frequency"
+- title: Make it data-specific and descriptive
+- keyFindings: Include 2-3 specific insights based on the data
+
+Generate a visualization that directly answers the user's question with the available data.`;
+
+      try {
+        const result = await generateObject({
+          model: openai("gpt-4o"),
+          schema: VisualizationGenerationSchema,
+          prompt,
+        });
+
+        // Log for debugging
+        console.log(
+          "Generated visualization result:",
+          JSON.stringify(result.object, null, 2)
+        );
+
+        return result.object;
+      } catch (error) {
+        console.error("Error generating visualization:", error);
+        console.error("Prompt used:", prompt);
+        throw new Error(
+          `Failed to generate visualization: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
     }),
 });
 
