@@ -26,6 +26,7 @@ interface DataInsightsProps {
   onVisualizationSelect?: (
     recommendation: DataInsight["visualizationRecommendations"][0],
   ) => void;
+  onQuestionSelect?: (question: string) => void;
 }
 
 const getImportanceColor = (importance: "high" | "medium" | "low") => {
@@ -54,6 +55,7 @@ export const DataInsights = ({
   insights,
   onFieldSelect,
   onVisualizationSelect,
+  onQuestionSelect,
 }: DataInsightsProps) => {
   const [activeTab, setActiveTab] = useState<
     "semantic" | "viz" | "insights" | "questions"
@@ -272,9 +274,11 @@ export const DataInsights = ({
             id="questions-panel"
           >
             {insights.suggestedQuestions.map((question, index) => (
-              <div
+              <button
                 key={`question-${question.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
-                className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                type="button"
+                className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => onQuestionSelect?.(question)}
               >
                 <div className="flex items-start">
                   <span
@@ -287,7 +291,7 @@ export const DataInsights = ({
                     {question}
                   </p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

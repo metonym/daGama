@@ -1,8 +1,27 @@
 import bgImage from "@/assets/cover.jpg";
 import { cx } from "@/utils/cx";
+import { useState } from "react";
+import { DynamicUIOverlay } from "./DynamicUIOverlay";
 import { FileDrop } from "./FileDrop";
 
+interface DataPoint {
+  [key: string]: unknown;
+}
+
 export const Intro = () => {
+  const [overlayState, setOverlayState] = useState<{
+    question: string;
+    data: DataPoint[];
+  } | null>(null);
+
+  const handleQuestionSelect = (question: string, data: DataPoint[]) => {
+    setOverlayState({ question, data });
+  };
+
+  const handleCloseOverlay = () => {
+    setOverlayState(null);
+  };
+
   return (
     <div
       className={cx(
@@ -18,6 +37,15 @@ export const Intro = () => {
         )}
         style={{ backgroundImage: `url(${bgImage})` }}
       />
+
+      {/* Dynamic UI Overlay */}
+      {overlayState && (
+        <DynamicUIOverlay
+          question={overlayState.question}
+          data={overlayState.data}
+          onClose={handleCloseOverlay}
+        />
+      )}
 
       {/* Content overlay */}
       <div className="relative z-10 w-[58%]">
@@ -65,7 +93,7 @@ export const Intro = () => {
           </div>
         </div> */}
         <div className="w-full max-w-7xl my-12 mx-auto">
-          <FileDrop />
+          <FileDrop onQuestionSelect={handleQuestionSelect} />
         </div>
       </div>
     </div>

@@ -4,11 +4,16 @@ import { type JsonSchema, inferJsonSchema } from "@/utils/schema-inference";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DataInsights } from "./DataInsights";
 import { JsonViewer } from "./JsonViewer";
+import { ProactiveDataAnalysis } from "./ProactiveDataAnalysis";
 import { SchemaInspector } from "./SchemaInspector";
 import { Label } from "./typography";
 
 interface FileDropProps {
   onFileProcessed?: (data: unknown, schema: JsonSchema) => void;
+  onQuestionSelect?: (
+    question: string,
+    data: Array<Record<string, unknown>>,
+  ) => void;
   className?: string;
 }
 
@@ -28,7 +33,11 @@ interface ParseProgress {
   currentCount?: number;
 }
 
-export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
+export const FileDrop = ({
+  onFileProcessed,
+  onQuestionSelect,
+  className,
+}: FileDropProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [parseProgress, setParseProgress] = useState<ParseProgress | null>(
@@ -387,34 +396,22 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
             </div>
           </div>
 
-          {/* Analysis Results */}
-          {insights && (
-            <div>
-              <Label>AI Analysis</Label>
-              <DataInsights
-                insights={insights}
-                onFieldSelect={(field) => {
-                  console.log("Selected field:", field);
-                  // TODO: Implement field selection behavior
-                }}
-                onVisualizationSelect={(viz) => {
-                  console.log("Selected visualization:", viz);
-                  // TODO: Implement visualization generation
-                }}
-              />
-            </div>
-          )}
+          {/* Proactive Data Analysis - Shows immediately */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              📊 Instant Data Overview
+            </h2>
+            <ProactiveDataAnalysis
+              data={
+                Array.isArray(processedFile.data)
+                  ? (processedFile.data as Array<Record<string, unknown>>)
+                  : [processedFile.data as Record<string, unknown>]
+              }
+              fileName={processedFile.name}
+            />
+          </div>
 
-          {/* Analysis Error */}
-          {analyzeError && (
-            <div>
-              <Label>Analysis Error</Label>
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{analyzeError}</p>
-              </div>
-            </div>
-          )}
-
+          {/* Schema and Raw Data - Show immediately */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <Label>Data Preview</Label>
@@ -429,6 +426,67 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
               <SchemaInspector schema={processedFile.schema} />
             </div>
           </div>
+
+          {/* AI Analysis Results */}
+          {insights && (
+            <div className="space-y-6">
+              {/* AI Analysis - With analyze button */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    🤖 AI Data Analysis
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleAnalyzeData}
+                    disabled={analyzeLoading}
+                    className={cx(
+                      "px-4 py-2 rounded-lg font-medium",
+                      analyzeLoading
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-indigo-600 text-white hover:bg-indigo-700",
+                    )}
+                  >
+                    {analyzeLoading ? "🤖 Analyzing..." : "🤖 Analyze with AI"}
+                  </button>
+                </div>
+                {(insights || analyzeLoading || analyzeError) && (
+                  <DataInsights
+                    insights={insights}
+                    onFieldSelect={(field) => {
+                      console.log("Selected field:", field);
+                      // TODO: Implement field selection behavior
+                    }}
+                    onVisualizationSelect={(viz) => {
+                      console.log("Selected visualization:", viz);
+                      // TODO: Implement visualization generation
+                    }}
+                    onQuestionSelect={(question) => {
+                      if (processedFile && onQuestionSelect) {
+                        // Convert data to the format expected by the overlay
+                        const dataArray = Array.isArray(processedFile.data)
+                          ? (processedFile.data as Array<
+                              Record<string, unknown>
+                            >)
+                          : [processedFile.data as Record<string, unknown>];
+                        onQuestionSelect(question, dataArray);
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Error */}
+          {analyzeError && (
+            <div>
+              <Label>Analysis Error</Label>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{analyzeError}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -1,0 +1,50 @@
+[
+  {
+    "endTime": "2024-01-15 14:23:45",
+    "artistName": "Taylor Swift",
+    "trackName": "Anti-Hero",
+    "msPlayed": 186432
+  },
+  {
+    "endTime": "2024-01-15 14:27:12",
+    "artistName": "The Weeknd",
+    "trackName": "Blinding Lights",
+    "msPlayed": 200156
+  },
+  {
+    "endTime": "2024-01-15 14:30:45",
+    "artistName": "Taylor Swift",
+    "trackName": "Lavender Haze",
+    "msPlayed": 182543
+  },
+  {
+    "endTime": "2024-01-15 14:34:22",
+    "artistName": "Drake",
+    "trackName": "God's Plan",
+    "msPlayed": 198765
+  },
+  {
+    "endTime": "2024-01-15 14:37:58",
+    "artistName": "The Weeknd",
+    "trackName": "Save Your Tears",
+    "msPlayed": 215432
+  },
+  {
+    "endTime": "2024-01-15 14:41:33",
+    "artistName": "Bad Bunny",
+    "trackName": "Me Porto Bonito",
+    "msPlayed": 167890
+  },
+  {
+    "endTime": "2024-01-15 14:44:55",
+    "artistName": "Taylor Swift",
+    "trackName": "Midnight Rain",
+    "msPlayed": 194321
+  },
+  {
+    "endTime": "2024-01-15 14:48:12",
+    "artistName": "Drake",
+    "trackName": "One Dance",
+    "msPlayed": 172345
+  }
+]
