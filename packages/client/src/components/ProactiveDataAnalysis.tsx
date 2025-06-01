@@ -108,8 +108,32 @@ const analyzeField = (data: DataPoint[], field: string): FieldAnalysis => {
 const generateAggregations = (
   data: DataPoint[],
   fieldAnalyses: FieldAnalysis[],
+  semanticFields?: SemanticField[],
 ): AggregationResult[] => {
   const results: AggregationResult[] = [];
+
+  // Create a map for quick importance lookup
+  const importanceMap = new Map<string, "high" | "medium" | "low">();
+  if (semanticFields) {
+    for (const field of semanticFields) {
+      importanceMap.set(field.field, field.importance);
+    }
+  }
+
+  // Helper function to get importance score for sorting
+  const getImportanceScore = (fieldName: string): number => {
+    const importance = importanceMap.get(fieldName);
+    switch (importance) {
+      case "high":
+        return 3;
+      case "medium":
+        return 2;
+      case "low":
+        return 1;
+      default:
+        return 0; // No semantic info available
+    }
+  };
 
   // Basic fallback: show distributions for categorical fields
   const categoricalFields = fieldAnalyses.filter(
@@ -119,7 +143,14 @@ const generateAggregations = (
       f.uniqueCount > 1,
   );
 
-  for (const field of categoricalFields.slice(0, 4)) {
+  // Sort categorical fields by importance
+  const sortedCategoricalFields = categoricalFields.sort((a, b) => {
+    const scoreA = getImportanceScore(a.field);
+    const scoreB = getImportanceScore(b.field);
+    return scoreB - scoreA; // Higher importance first
+  });
+
+  for (const field of sortedCategoricalFields.slice(0, 4)) {
     if (field.topValues && field.topValues.length > 1) {
       results.push({
         title: `Distribution by ${field.field}`,
@@ -136,8 +167,15 @@ const generateAggregations = (
   // Add cross-field analysis: numeric aggregations by categorical fields
   const numericFields = fieldAnalyses.filter((f) => f.type === "number");
 
-  for (const categoricalField of categoricalFields.slice(0, 2)) {
-    for (const numericField of numericFields.slice(0, 2)) {
+  // Sort numeric fields by importance
+  const sortedNumericFields = numericFields.sort((a, b) => {
+    const scoreA = getImportanceScore(a.field);
+    const scoreB = getImportanceScore(b.field);
+    return scoreB - scoreA; // Higher importance first
+  });
+
+  for (const categoricalField of sortedCategoricalFields.slice(0, 2)) {
+    for (const numericField of sortedNumericFields.slice(0, 2)) {
       const grouped: { [key: string]: number } = {};
 
       for (const item of data) {
@@ -167,7 +205,41 @@ const generateAggregations = (
     }
   }
 
-  return results.slice(0, 6);
+  // Sort final results by the maximum importance of fields involved in each aggregation
+  return results
+    .sort((a, b) => {
+      // Extract field names from titles to determine importance
+      const getAggregationImportance = (agg: AggregationResult): number => {
+        let maxImportance = 0;
+
+        // Check for "Distribution by field" pattern
+        if (agg.title.startsWith("Distribution by ")) {
+          const field = agg.title.replace("Distribution by ", "");
+          maxImportance = Math.max(maxImportance, getImportanceScore(field));
+        }
+        // Check for "field1 by field2" pattern
+        else if (agg.title.includes(" by ")) {
+          const parts = agg.title.split(" by ");
+          if (parts.length === 2) {
+            maxImportance = Math.max(
+              maxImportance,
+              getImportanceScore(parts[0]),
+            );
+            maxImportance = Math.max(
+              maxImportance,
+              getImportanceScore(parts[1]),
+            );
+          }
+        }
+
+        return maxImportance;
+      };
+
+      const importanceA = getAggregationImportance(a);
+      const importanceB = getAggregationImportance(b);
+      return importanceB - importanceA; // Higher importance first
+    })
+    .slice(0, 6);
 };
 
 const formatValue = (
@@ -433,7 +505,11 @@ export const ProactiveDataAnalysis = ({
 
     const fields = Object.keys(data[0]);
     const fieldAnalyses = fields.map((field) => analyzeField(data, field));
-    const aggregations = generateAggregations(data, fieldAnalyses);
+    const aggregations = generateAggregations(
+      data,
+      fieldAnalyses,
+      semanticFields,
+    );
 
     // Calculate overall stats
     const totalRecords = data.length;
@@ -455,7 +531,7 @@ export const ProactiveDataAnalysis = ({
         )[0],
       },
     };
-  }, [data]);
+  }, [data, semanticFields]);
 
   if (!analysis || !data.length) {
     return null;
@@ -476,7 +552,7 @@ export const ProactiveDataAnalysis = ({
       )}
 
       {/* Field Suggestions - Show always when we have data */}
-      <div className="max-w-4xl">
+      <div className="max-w-3/4">
         <div className="text-sm text-gray-600 font-medium mb-3">
           Suggested properties for analysis:
         </div>
@@ -530,10 +606,10 @@ export const ProactiveDataAnalysis = ({
                           <span
                             className={`inline-block w-2 h-2 rounded-full ${
                               field.importance === "high"
-                                ? "bg-red-500"
+                                ? "bg-blue-500"
                                 : field.importance === "medium"
-                                  ? "bg-yellow-500"
-                                  : "bg-gray-400"
+                                  ? "bg-gray-400"
+                                  : "bg-yellow-500"
                             }`}
                           />
                           <span className="text-xs text-gray-700 capitalize font-medium">
