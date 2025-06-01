@@ -304,9 +304,9 @@ export const FileDrop = ({
       {!processedFile ? (
         <div
           className={cx(
-            "border-2 border-dashed py-16 px-4 text-center transition-colors",
-            isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-300",
-            isProcessing && "opacity-50 cursor-not-allowed",
+            "py-8 text-left transition-colors",
+            isDragOver && !isProcessing ? "opacity-50" : "",
+            isProcessing && "opacity-50",
           )}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -321,21 +321,21 @@ export const FileDrop = ({
           />
 
           {isProcessing ? (
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent" />
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent" />
               <div className="text-center">
                 <p className="text-gray-600 font-medium text-sm">
                   Processing JSON file...
                 </p>
                 {parseProgress && (
-                  <div className="mt-3">
-                    <div className="w-64 bg-gray-200 h-1 mx-auto">
+                  <div className="mt-2">
+                    <div className="w-48 bg-gray-200 h-1 mx-auto">
                       <div
                         className="bg-blue-600 h-1 transition-all duration-300"
                         style={{ width: `${parseProgress.progress}%` }}
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-2 font-mono">
+                    <p className="text-xs text-gray-500 mt-1 font-mono">
                       {formatProgress(parseProgress)}
                     </p>
                   </div>
@@ -343,25 +343,20 @@ export const FileDrop = ({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4">
-              <div>
-                <p className="text-lg font-medium text-gray-900 mb-2">
-                  Drop JSON file here
-                </p>
-                <p className="max-w-lg text-sm text-gray-600 mb-6">
-                  Automatic data visualization and schema inference.{" "}
-                  {typeof Worker !== "undefined"
-                    ? "Files processed in background for optimal performance."
-                    : "Large files may cause temporary UI freezing."}
-                </p>
+            <div>
+              <p className="text-sm text-gray-600 mb-3 max-w-md leading-relaxed">
+                Drop your JSON file here for automatic data visualization and
+                schema inference. Large datasets are processed efficiently in
+                the background.{" "}
                 <button
                   type="button"
                   onClick={handleBrowseClick}
-                  className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium text-sm"
+                  className="text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium"
                 >
                   Browse files
-                </button>
-              </div>
+                </button>{" "}
+                to get started.
+              </p>
             </div>
           )}
         </div>
