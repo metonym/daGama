@@ -72,6 +72,18 @@ Build an LLM-assisted interface that helps users:
 - Semantic analysis of each property from schema (seeded with example values)
 
 - Typography: hierarchy, font, size, weight, color
-- Organization of info:
+- Organization of info based on the semantic meaning (track start, track end)
 
+- Visualize relationships between fields
+  - Infer schema from LLM (backend)
+    - then visualize as graph on frontend
 - Visualize branching
+
+- User interaction
+
+  - Excluding fields, subset
+  - Asking questions
+
+  MCP (Spotify), or API
+
+  - Retrieving metadata and visuals

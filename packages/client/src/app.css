@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-family-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "EB Garamond", ui-serif, Georgia, serif;
 
   --color-ocean-50: #d6f4f1;
   --color-ocean-200: #8de1e2;
@@ -13,7 +14,7 @@
 }
 
 body {
-  font-family: var(--font-family-sans);
+  font-family: var(--font-sans);
   color: var(--color-ocean-900);
-  background-color: var(--color-ocean-50);
+  background-color: var(--color-white);
 }

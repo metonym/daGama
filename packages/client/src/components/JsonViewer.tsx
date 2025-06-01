@@ -269,18 +269,18 @@ export const JsonViewer = ({
                 {formatBytes(fileSize)}
               </div>
             )}
-            {objectCount !== undefined && (
-              <div>
-                <span className="font-medium">Objects:</span>{" "}
-                {objectCount.toLocaleString()}
-              </div>
-            )}
             <div>
               <span className="font-medium">Type:</span>{" "}
               <span className="ml-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded">
                 {Array.isArray(data) ? "array" : "object"}
               </span>
             </div>
+            {objectCount !== undefined && (
+              <div>
+                <span className="font-medium">Objects:</span>{" "}
+                {objectCount.toLocaleString()}
+              </div>
+            )}
             <div>
               <span className="font-medium">Depth:</span> {depth}
             </div>

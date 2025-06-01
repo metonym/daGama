@@ -213,10 +213,10 @@ export const SchemaInspector = ({ schema }: SchemaInspectorProps) => {
 
   return (
     <div className="bg-gray-50 border overflow-hidden h-96">
-      <div className="p-4 pb-3 border-b border-gray-200">
+      <div className="p-4 pb-3 bg-white border-b border-gray-200">
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <div>
-            <span className="font-medium">Root Type:</span>
+            <span className="font-medium">Type:</span>
             <span
               className={cx(
                 "ml-1 px-2 py-1 text-xs",
