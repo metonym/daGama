@@ -1,6 +1,8 @@
+import { useDataAnalysis } from "@/hooks/useDataAnalysis";
 import { cx } from "@/utils/cx";
 import { type JsonSchema, inferJsonSchema } from "@/utils/schema-inference";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DataInsights } from "./DataInsights";
 import { JsonViewer } from "./JsonViewer";
 import { SchemaInspector } from "./SchemaInspector";
 import { Label } from "./typography";
@@ -38,6 +40,15 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
+
+  // Add AI analysis hook
+  const {
+    insights,
+    loading: analyzeLoading,
+    error: analyzeError,
+    analyzeSchema,
+    clearInsights,
+  } = useDataAnalysis();
 
   // Initialize worker
   useEffect(() => {
@@ -230,10 +241,23 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
     setProcessedFile(null);
     setError(null);
     setParseProgress(null);
+    clearInsights(); // Clear analysis when clearing file
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }, []);
+  }, [clearInsights]);
+
+  // Add function to handle AI analysis
+  const handleAnalyzeData = useCallback(async () => {
+    if (!processedFile) return;
+
+    // Convert data to sample for analysis (take first few items if array)
+    const sampleData = Array.isArray(processedFile.data)
+      ? (processedFile.data.slice(0, 5) as Array<Record<string, unknown>>)
+      : [processedFile.data as Record<string, unknown>];
+
+    await analyzeSchema(processedFile.schema, sampleData, processedFile.name);
+  }, [processedFile, analyzeSchema]);
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -334,14 +358,62 @@ export const FileDrop = ({ onFileProcessed, className }: FileDropProps) => {
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={clearFile}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
-            >
-              Clear
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleAnalyzeData}
+                disabled={analyzeLoading}
+                className={cx(
+                  "px-4 py-2 text-sm font-medium transition-colors",
+                  "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed",
+                )}
+              >
+                {analyzeLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    Analyzing...
+                  </div>
+                ) : (
+                  "🤖 Analyze with AI"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={clearFile}
+                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
+              >
+                Clear
+              </button>
+            </div>
           </div>
+
+          {/* Analysis Results */}
+          {insights && (
+            <div>
+              <Label>AI Analysis</Label>
+              <DataInsights
+                insights={insights}
+                onFieldSelect={(field) => {
+                  console.log("Selected field:", field);
+                  // TODO: Implement field selection behavior
+                }}
+                onVisualizationSelect={(viz) => {
+                  console.log("Selected visualization:", viz);
+                  // TODO: Implement visualization generation
+                }}
+              />
+            </div>
+          )}
+
+          {/* Analysis Error */}
+          {analyzeError && (
+            <div>
+              <Label>Analysis Error</Label>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{analyzeError}</p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
