@@ -216,16 +216,23 @@ export const DataInsights = ({
 
               <div className="space-y-2">
                 {insights.suggestedQuestions.map((question, index) => (
-                  <button
+                  <div
                     key={`question-${question.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
-                    type="button"
-                    className="w-full text-left p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
-                    onClick={() => onQuestionSelect?.(question)}
+                    className="flex items-center gap-3 p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
                   >
-                    <p className="text-sm text-gray-900 leading-relaxed">
-                      {question}
-                    </p>
-                  </button>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900 leading-relaxed">
+                        {question}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-xs font-medium transition-colors"
+                      onClick={() => onQuestionSelect?.(question)}
+                    >
+                      Visualize
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
