@@ -111,7 +111,7 @@ export const DataInsights = ({
                 {insights.visualizationRecommendations.map((rec, index) => (
                   <div
                     key={`${rec.chartType}-${rec.fieldCombination.join("-")}-${index}`}
-                    className="bg-green-50 border border-green-200 p-3 flex flex-col space-y-4 justify-between break-words"
+                    className="bg-gray-50 border border-gray-200 p-3 flex flex-col space-y-4 justify-between break-words"
                   >
                     <div>
                       <div className="font-medium text-gray-900 text-xs mb-2">
