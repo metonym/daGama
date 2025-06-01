@@ -288,8 +288,8 @@ export const FileDrop = ({
       {!processedFile ? (
         <div
           className={cx(
-            "border-2 border-dashed py-12 px-4 text-center transition-colors",
-            isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-900/80",
+            "border-2 border-dashed py-16 px-4 text-center transition-colors",
+            isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-300",
             isProcessing && "opacity-50 cursor-not-allowed",
           )}
           onDrop={handleDrop}
@@ -306,20 +306,20 @@ export const FileDrop = ({
 
           {isProcessing ? (
             <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent" />
               <div className="text-center">
-                <p className="text-gray-600 font-medium">
+                <p className="text-gray-600 font-medium text-sm">
                   Processing JSON file...
                 </p>
                 {parseProgress && (
-                  <div className="mt-2">
-                    <div className="w-64 bg-gray-200 rounded-full h-2 mx-auto">
+                  <div className="mt-3">
+                    <div className="w-64 bg-gray-200 h-1 mx-auto">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-600 h-1 transition-all duration-300"
                         style={{ width: `${parseProgress.progress}%` }}
                       />
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 mt-2 font-mono">
                       {formatProgress(parseProgress)}
                     </p>
                   </div>
@@ -329,22 +329,19 @@ export const FileDrop = ({
           ) : (
             <div className="flex flex-col items-center gap-4">
               <div>
-                <p className="text-xl font-medium text-gray-900 mb-2">
-                  Drop files here
+                <p className="text-lg font-medium text-gray-900 mb-2">
+                  Drop JSON file here
                 </p>
-                <p className="max-w-lg text-gray-600 mb-4">
-                  We'll automatically visualize the data and infer its schema.{" "}
+                <p className="max-w-lg text-sm text-gray-600 mb-6">
+                  Automatic data visualization and schema inference.{" "}
                   {typeof Worker !== "undefined"
-                    ? "Files will be processed in the background for optimal performance"
-                    : "Note: Web Workers not supported - large files may cause temporary UI freezing"}
+                    ? "Files processed in background for optimal performance."
+                    : "Large files may cause temporary UI freezing."}
                 </p>
                 <button
                   type="button"
                   onClick={handleBrowseClick}
-                  className={cx(
-                    "px-4 py-2 bg-blue-600 text-white hover:bg-blue-700",
-                    "transition-colors font-medium",
-                  )}
+                  className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium text-sm"
                 >
                   Browse files
                 </button>
@@ -353,19 +350,20 @@ export const FileDrop = ({
           )}
         </div>
       ) : (
-        <div className="space-y-20">
-          <div className="flex items-center justify-between">
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
             <div>
-              <Label>Files</Label>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  {processedFile.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {processedFile.objectCount.toLocaleString()} objects •{" "}
-                  {formatBytes(processedFile.size)}
-                </p>
+              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                Dataset
               </div>
+              <h3 className="text-lg font-semibold text-gray-900 font-mono">
+                {processedFile.name}
+              </h3>
+              <p className="text-sm text-gray-600 font-mono">
+                {processedFile.objectCount.toLocaleString()} objects •{" "}
+                {formatBytes(processedFile.size)}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -373,13 +371,15 @@ export const FileDrop = ({
                 onClick={handleAnalyzeData}
                 disabled={analyzeLoading}
                 className={cx(
-                  "px-4 py-2 text-sm font-medium transition-colors",
-                  "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed",
+                  "px-4 py-2 text-sm font-medium transition-colors border",
+                  analyzeLoading
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                    : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600",
                 )}
               >
                 {analyzeLoading ? (
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    <div className="animate-spin h-3 w-3 border border-white border-t-transparent" />
                     Analyzing...
                   </div>
                 ) : (
@@ -389,17 +389,19 @@ export const FileDrop = ({
               <button
                 type="button"
                 onClick={clearFile}
-                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:bg-gray-50"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          {/* Schema and Raw Data - Show first */}
+          {/* Schema and Raw Data */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <Label>Data Preview</Label>
+              <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
+                Data Preview
+              </div>
               <JsonViewer
                 data={processedFile.data}
                 objectCount={processedFile.objectCount}
@@ -407,16 +409,18 @@ export const FileDrop = ({
               />
             </div>
             <div>
-              <Label>Schema</Label>
+              <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">
+                Schema
+              </div>
               <SchemaInspector schema={processedFile.schema} />
             </div>
           </div>
 
-          {/* Proactive Data Analysis - Show second */}
+          {/* Data Overview */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Instant Data Overview
-            </h2>
+            <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
+              Instant Overview
+            </div>
             <ProactiveDataAnalysis
               data={
                 Array.isArray(processedFile.data)
@@ -427,24 +431,24 @@ export const FileDrop = ({
             />
           </div>
 
-          {/* AI Analysis - Always show */}
+          {/* AI Analysis */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                AI Data Analysis
-              </h2>
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                AI Analysis
+              </div>
               <button
                 type="button"
                 onClick={handleAnalyzeData}
                 disabled={analyzeLoading}
                 className={cx(
-                  "px-4 py-2 rounded-lg font-medium",
+                  "px-3 py-1 text-xs font-medium border",
                   analyzeLoading
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700",
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300",
                 )}
               >
-                {analyzeLoading ? "Analyzing..." : "Analyze with AI"}
+                {analyzeLoading ? "Analyzing..." : "Run Analysis"}
               </button>
             </div>
             {(insights || analyzeLoading || analyzeError) && (
@@ -456,15 +460,12 @@ export const FileDrop = ({
                     error={analyzeError}
                     onFieldSelect={(field) => {
                       console.log("Selected field:", field);
-                      // TODO: Implement field selection behavior
                     }}
                     onVisualizationSelect={(viz) => {
                       console.log("Selected visualization:", viz);
-                      // TODO: Implement visualization generation
                     }}
                     onQuestionSelect={(question) => {
                       if (processedFile && onQuestionSelect) {
-                        // Convert data to the format expected by the overlay
                         const dataArray = Array.isArray(processedFile.data)
                           ? (processedFile.data as Array<
                               Record<string, unknown>
@@ -476,25 +477,25 @@ export const FileDrop = ({
                   />
                 )}
                 {!insights && (analyzeLoading || analyzeError) && (
-                  <div className="bg-white border border-gray-200 overflow-hidden h-96">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-4">
-                      <h2 className="text-lg font-semibold text-gray-900">
+                  <div className="bg-white border border-gray-200 h-80">
+                    <div className="bg-gray-50 border-b border-gray-200 p-3">
+                      <div className="text-sm font-medium text-gray-900">
                         AI Data Analysis
-                      </h2>
+                      </div>
                     </div>
-                    <div className="p-4 h-80 overflow-y-auto">
+                    <div className="p-4 h-64 overflow-y-auto">
                       {analyzeLoading && (
                         <div className="flex items-center justify-center h-full">
                           <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-                            <p className="text-gray-600">
+                            <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent mx-auto mb-3" />
+                            <p className="text-sm text-gray-600">
                               Analyzing data with AI...
                             </p>
                           </div>
                         </div>
                       )}
                       {analyzeError && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="p-3 bg-red-50 border border-red-200">
                           <p className="text-sm text-red-600">{analyzeError}</p>
                         </div>
                       )}
@@ -504,16 +505,6 @@ export const FileDrop = ({
               </>
             )}
           </div>
-
-          {/* Analysis Error */}
-          {analyzeError && (
-            <div>
-              <Label>Analysis Error</Label>
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{analyzeError}</p>
-              </div>
-            </div>
-          )}
         </div>
       )}
 

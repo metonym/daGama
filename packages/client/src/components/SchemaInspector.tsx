@@ -34,20 +34,20 @@ interface SchemaItemProps {
 const getTypeColor = (type: string): string => {
   switch (type) {
     case "string":
-      return "text-green-600 bg-green-50";
+      return "text-green-700 bg-gray-100";
     case "number":
     case "integer":
-      return "text-blue-600 bg-blue-50";
+      return "text-blue-700 bg-gray-100";
     case "boolean":
-      return "text-purple-600 bg-purple-50";
+      return "text-purple-700 bg-gray-100";
     case "array":
-      return "text-orange-600 bg-orange-50";
+      return "text-orange-700 bg-gray-100";
     case "object":
-      return "text-pink-600 bg-pink-50";
+      return "text-pink-700 bg-gray-100";
     case "null":
-      return "text-gray-600 bg-gray-50";
+      return "text-gray-700 bg-gray-100";
     default:
-      return "text-gray-600 bg-gray-50";
+      return "text-gray-700 bg-gray-100";
   }
 };
 
@@ -55,24 +55,24 @@ const SchemaItemComponent = ({ item, onToggle }: SchemaItemProps) => {
   const toggleExpand = () => onToggle(item.id);
 
   return (
-    <div className="font-mono text-sm py-1 px-2 hover:bg-gray-100">
+    <div className="font-mono text-[10px] py-0.5 px-2 hover:bg-gray-50 border-b border-gray-100">
       <div className="flex items-center">
         <div
-          style={{ marginLeft: `${item.level * 16}px` }}
+          style={{ marginLeft: `${item.level * 12}px` }}
           className="flex items-center"
         >
           {item.hasChildren && (
             <button
               type="button"
               onClick={toggleExpand}
-              className="mr-2 text-gray-500 hover:text-gray-700 w-4 h-4 flex items-center justify-center"
+              className="mr-2 text-gray-500 hover:text-gray-700 w-3 h-3 flex items-center justify-center text-[10px]"
             >
               {item.isExpanded ? "▼" : "▶"}
             </button>
           )}
 
           {item.isArrayItems && (
-            <span className="text-gray-600 text-xs mr-2">Items:</span>
+            <span className="text-gray-600 text-[10px] mr-2">Items:</span>
           )}
 
           {item.name && !item.isArrayItems && (
@@ -81,7 +81,7 @@ const SchemaItemComponent = ({ item, onToggle }: SchemaItemProps) => {
 
           <span
             className={cx(
-              "px-2 py-1 text-xs font-medium",
+              "px-1 py-0.5 text-[10px] font-medium",
               getTypeColor(item.property.type),
             )}
           >
@@ -89,13 +89,13 @@ const SchemaItemComponent = ({ item, onToggle }: SchemaItemProps) => {
           </span>
 
           {item.property.example !== undefined && (
-            <span className="ml-2 text-gray-500 text-xs">
+            <span className="ml-2 text-gray-500 text-[10px]">
               e.g., {JSON.stringify(item.property.example)}
             </span>
           )}
 
           {item.hasChildren && !item.isExpanded && item.childCount && (
-            <span className="ml-2 text-gray-500 text-xs">
+            <span className="ml-2 text-gray-500 text-[10px]">
               ({item.childCount}{" "}
               {item.childCount === 1 ? "property" : "properties"})
             </span>
@@ -212,14 +212,14 @@ export const SchemaInspector = ({ schema }: SchemaInspectorProps) => {
   const stats = getStats(schema);
 
   return (
-    <div className="bg-gray-50 border overflow-hidden h-96">
-      <div className="p-4 pb-3 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-4 text-sm text-gray-600">
+    <div className="bg-white border border-gray-200 overflow-hidden h-96">
+      <div className="p-2 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-3 text-[10px] text-gray-600 font-mono">
           <div>
             <span className="font-medium">Type:</span>
             <span
               className={cx(
-                "ml-1 px-2 py-1 text-xs",
+                "ml-1 px-1 py-0.5 text-[10px]",
                 getTypeColor(schema.type),
               )}
             >
@@ -249,7 +249,7 @@ export const SchemaInspector = ({ schema }: SchemaInspectorProps) => {
               onToggle={handleToggle}
             />
           )}
-          className="p-2"
+          className="p-0"
         />
       </div>
     </div>

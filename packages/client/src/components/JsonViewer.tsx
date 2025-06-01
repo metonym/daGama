@@ -69,17 +69,17 @@ const JsonItemComponent = ({ item, onToggle }: JsonItemProps) => {
   };
 
   return (
-    <div className="font-mono text-sm py-1 px-2 hover:bg-gray-100">
+    <div className="font-mono text-[10px] py-0.5 px-2 hover:bg-gray-50 border-b border-gray-100">
       <div className="flex items-start">
         <div
-          style={{ marginLeft: `${item.level * 20}px` }}
+          style={{ marginLeft: `${item.level * 12}px` }}
           className="flex items-center"
         >
           {item.hasChildren && (
             <button
               type="button"
               onClick={toggleExpand}
-              className="mr-1 text-gray-500 hover:text-gray-700 w-4 h-4 flex items-center justify-center"
+              className="mr-1 text-gray-500 hover:text-gray-700 w-3 h-3 flex items-center justify-center text-xs"
             >
               {item.isExpanded ? "▼" : "▶"}
             </button>
@@ -114,9 +114,9 @@ const ClosingBracket = ({
   level,
   isArray,
 }: { level: number; isArray: boolean }) => (
-  <div className="font-mono text-sm py-1 px-2">
+  <div className="font-mono text-xs py-0.5 px-2 border-b border-gray-100">
     <div
-      style={{ marginLeft: `${level * 20}px` }}
+      style={{ marginLeft: `${level * 12}px` }}
       className="text-gray-600"
     >
       {isArray ? "]" : "}"}
@@ -256,28 +256,28 @@ export const JsonViewer = ({
   return (
     <div
       className={cx(
-        "bg-gray-50 border overflow-hidden h-96",
+        "bg-white border border-gray-200 overflow-hidden h-96",
         "scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100",
       )}
     >
       {(objectCount !== undefined || fileSize !== undefined) && (
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center gap-4 text-sm text-gray-600">
+        <div className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 p-2">
+          <div className="flex items-center gap-3 text-[10px] text-gray-600 font-mono">
             {fileSize !== undefined && (
               <div>
-                <span className="font-medium">File Size:</span>{" "}
+                <span className="font-medium">Size:</span>{" "}
                 {formatBytes(fileSize)}
               </div>
             )}
             <div>
               <span className="font-medium">Type:</span>{" "}
-              <span className="ml-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded">
+              <span className="ml-1 px-1 py-0.5 text-xs text-gray-600 bg-gray-200">
                 {Array.isArray(data) ? "array" : "object"}
               </span>
             </div>
             {objectCount !== undefined && (
               <div>
-                <span className="font-medium">Objects:</span>{" "}
+                <span className="font-medium">Count:</span>{" "}
                 {objectCount.toLocaleString()}
               </div>
             )}
@@ -312,7 +312,7 @@ export const JsonViewer = ({
             />
           );
         }}
-        className="p-2"
+        className="p-0"
       />
     </div>
   );

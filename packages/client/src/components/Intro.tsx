@@ -25,7 +25,7 @@ export const Intro = () => {
   return (
     <div
       className={cx(
-        "h-screen w-full flex items-center p-12 relative",
+        "min-h-screen w-full p-12 relative",
         "outline outline-gray-200 outline-offset-[-1rem]",
       )}
     >
@@ -48,51 +48,15 @@ export const Intro = () => {
       )}
 
       {/* Content overlay */}
-      <div className="relative z-10 w-[58%]">
-        <div
-          className={cx(
-            "w-full max-w-4xl my-12 mx-auto gap-1",
-            "flex flex-col",
-          )}
-        >
-          <h1
-            className={cx(
-              //"text-4xl font-medium",
-              //"tracking-tighter",
-              "text-gray-900",
-              "text-8xl font-serif",
-            )}
-          >
-            vasco
-          </h1>
-          <div className="text-2xl font-medium text-gray-900">
+      <div className="relative z-10 w-[58%] py-12">
+        <div className={cx("w-full max-w-4xl mx-auto gap-1", "flex flex-col")}>
+          <h1 className={cx("text-gray-900", "text-8xl font-serif")}>vasco</h1>
+          <div className="text-2xl font-medium text-gray-900 mb-12">
             Design from the shape of data
           </div>
         </div>
-        {/*      <div
-          className={cx(
-            "grid grid-cols-4 gap-4",
-            "w-full max-w-7xl my-12 mx-auto",
-          )}
-        >
-          <div className={cx("text-2xl", "text-gray-700", "flex flex-col")}>
-            <div className={cx("text-4xl", "text-gray-900")}>14k</div>
-            <div className={cx("text-lg", "text-gray-700")}>Items</div>
-          </div>
-          <div className={cx("text-2xl", "text-gray-700", "flex flex-col")}>
-            <div className={cx("text-4xl", "text-gray-900")}>14k</div>
-            <div className={cx("text-lg", "text-gray-700")}>Items</div>
-          </div>
-          <div className={cx("text-2xl", "text-gray-700", "flex flex-col")}>
-            <div className={cx("text-4xl", "text-gray-900")}>14k</div>
-            <div className={cx("text-lg", "text-gray-700")}>Items</div>
-          </div>
-          <div className={cx("text-2xl", "text-gray-700", "flex flex-col")}>
-            <div className={cx("text-4xl", "text-gray-900")}>14k</div>
-            <div className={cx("text-lg", "text-gray-700")}>Items</div>
-          </div>
-        </div> */}
-        <div className="w-full max-w-7xl my-12 mx-auto">
+
+        <div className="w-full max-w-7xl mx-auto">
           <FileDrop onQuestionSelect={handleQuestionSelect} />
         </div>
       </div>

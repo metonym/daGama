@@ -34,22 +34,22 @@ interface DataInsightsProps {
 const getImportanceColor = (importance: "high" | "medium" | "low") => {
   switch (importance) {
     case "high":
-      return "bg-red-100 text-red-800 border-red-200";
+      return "bg-red-100 text-red-800";
     case "medium":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      return "bg-yellow-100 text-yellow-800";
     case "low":
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const getPriorityColor = (priority: "high" | "medium" | "low") => {
   switch (priority) {
     case "high":
-      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      return "bg-emerald-100 text-emerald-800";
     case "medium":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-blue-100 text-blue-800";
     case "low":
-      return "bg-slate-100 text-slate-800 border-slate-200";
+      return "bg-slate-100 text-slate-800";
   }
 };
 
@@ -91,9 +91,9 @@ export const DataInsights = ({
   return (
     <div className="bg-white border border-gray-200 overflow-hidden h-96">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">
-          🤖 AI Data Analysis
+      <div className="bg-gray-50 border-b border-gray-200 p-3">
+        <h2 className="text-sm font-medium text-gray-900 mb-3 uppercase tracking-wide">
+          AI Data Analysis
         </h2>
         <div
           className="flex space-x-1"
@@ -108,15 +108,15 @@ export const DataInsights = ({
               aria-controls={`${tab.id}-panel`}
               onClick={() => setActiveTab(tab.id)}
               className={cx(
-                "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                "px-3 py-1.5 text-xs font-medium transition-colors border",
                 activeTab === tab.id
-                  ? "bg-white text-blue-700 shadow-sm border border-blue-200"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50",
+                  ? "bg-white text-blue-700 border-blue-200"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white border-gray-200",
               )}
             >
               {tab.label}
               {tab.count > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-700 rounded-full">
+                <span className="ml-1 px-1 py-0.5 text-xs bg-gray-200 text-gray-700">
                   {tab.count}
                 </span>
               )}
@@ -126,10 +126,10 @@ export const DataInsights = ({
       </div>
 
       {/* Content */}
-      <div className="p-4 h-80 overflow-y-auto">
+      <div className="p-3 h-80 overflow-y-auto">
         {activeTab === "semantic" && (
           <div
-            className="space-y-3"
+            className="space-y-2"
             role="tabpanel"
             id="semantic-panel"
           >
@@ -137,7 +137,7 @@ export const DataInsights = ({
               <button
                 key={analysis.field}
                 type="button"
-                className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full text-left p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
                 onClick={() => onFieldSelect?.(analysis.field)}
                 aria-label={`Select field ${analysis.field}`}
               >
@@ -148,13 +148,13 @@ export const DataInsights = ({
                   <div className="flex items-center space-x-2">
                     <span
                       className={cx(
-                        "px-2 py-1 text-xs font-medium border rounded-full",
+                        "px-1 py-0.5 text-xs font-medium",
                         getImportanceColor(analysis.importance),
                       )}
                     >
                       {analysis.importance}
                     </span>
-                    <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
+                    <span className="px-1 py-0.5 text-xs bg-blue-100 text-blue-700">
                       {analysis.category}
                     </span>
                   </div>
@@ -172,7 +172,7 @@ export const DataInsights = ({
 
         {activeTab === "viz" && (
           <div
-            className="space-y-3"
+            className="space-y-2"
             role="tabpanel"
             id="viz-panel"
           >
@@ -180,7 +180,7 @@ export const DataInsights = ({
               <button
                 key={`${rec.chartType}-${rec.fieldCombination.join("-")}-${index}`}
                 type="button"
-                className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full text-left p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
                 onClick={() => onVisualizationSelect?.(rec)}
                 aria-label={`Select ${rec.chartType} visualization`}
               >
@@ -188,7 +188,7 @@ export const DataInsights = ({
                   <h3 className="font-medium text-gray-900">{rec.chartType}</h3>
                   <span
                     className={cx(
-                      "px-2 py-1 text-xs font-medium border rounded-full",
+                      "px-1 py-0.5 text-xs font-medium",
                       getPriorityColor(rec.priority),
                     )}
                   >
@@ -203,7 +203,7 @@ export const DataInsights = ({
                     {rec.fieldCombination.map((field) => (
                       <span
                         key={field}
-                        className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded font-mono"
+                        className="px-1 py-0.5 text-xs bg-gray-100 text-gray-700 font-mono"
                       >
                         {field}
                       </span>
@@ -227,43 +227,27 @@ export const DataInsights = ({
             {insights?.keyInsights.map((insight, index) => (
               <div
                 key={`insight-${insight.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
-                className="p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                className="p-3 bg-blue-50 border border-blue-200"
               >
-                <div className="flex items-start">
-                  <span
-                    className="text-blue-600 mr-2 mt-0.5"
-                    aria-hidden="true"
-                  >
-                    💡
-                  </span>
-                  <p className="text-sm text-blue-900 leading-relaxed">
-                    {insight}
-                  </p>
-                </div>
+                <p className="text-sm text-blue-900 leading-relaxed">
+                  {insight}
+                </p>
               </div>
             ))}
 
             {insights?.dataQualityNotes.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">
+                <h4 className="text-xs font-medium text-gray-900 mb-2 uppercase tracking-wide">
                   Data Quality Notes
                 </h4>
                 {insights.dataQualityNotes.map((note, index) => (
                   <div
                     key={`quality-${note.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
-                    className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-2"
+                    className="p-3 bg-yellow-50 border border-yellow-200 mb-2"
                   >
-                    <div className="flex items-start">
-                      <span
-                        className="text-yellow-600 mr-2 mt-0.5"
-                        aria-hidden="true"
-                      >
-                        ⚠️
-                      </span>
-                      <p className="text-sm text-yellow-900 leading-relaxed">
-                        {note}
-                      </p>
-                    </div>
+                    <p className="text-sm text-yellow-900 leading-relaxed">
+                      {note}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -281,20 +265,12 @@ export const DataInsights = ({
               <button
                 key={`question-${question.slice(0, 20).replace(/\s+/g, "-")}-${index}`}
                 type="button"
-                className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full text-left p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
                 onClick={() => onQuestionSelect?.(question)}
               >
-                <div className="flex items-start">
-                  <span
-                    className="text-green-600 mr-2 mt-0.5"
-                    aria-hidden="true"
-                  >
-                    ❓
-                  </span>
-                  <p className="text-sm text-gray-900 leading-relaxed">
-                    {question}
-                  </p>
-                </div>
+                <p className="text-sm text-gray-900 leading-relaxed">
+                  {question}
+                </p>
               </button>
             ))}
           </div>
@@ -303,21 +279,21 @@ export const DataInsights = ({
         {isLoading && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-              <p className="text-gray-600">Analyzing data with AI...</p>
+              <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent mx-auto mb-3" />
+              <p className="text-sm text-gray-600">Analyzing data with AI...</p>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="p-3 bg-red-50 border border-red-200">
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
 
         {!isLoading && !error && !insights && (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">
+            <p className="text-sm text-gray-500">
               Click "Analyze with AI" to get insights about your data
             </p>
           </div>
