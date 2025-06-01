@@ -350,6 +350,70 @@ const StatsCard = ({
   </div>
 );
 
+interface DataStatsProps {
+  data: DataPoint[];
+}
+
+export const DataStats = ({ data }: DataStatsProps) => {
+  const analysis = useMemo(() => {
+    if (!data.length) return null;
+
+    const fields = Object.keys(data[0]);
+    const fieldAnalyses = fields.map((field) => analyzeField(data, field));
+
+    // Calculate overall stats
+    const totalRecords = data.length;
+    const totalFields = fields.length;
+    const numericFields = fieldAnalyses.filter((f) => f.type === "number");
+    const stringFields = fieldAnalyses.filter((f) => f.type === "string");
+
+    return {
+      fieldAnalyses,
+      stats: {
+        totalRecords,
+        totalFields,
+        numericFields: numericFields.length,
+        stringFields: stringFields.length,
+        mostPopularField: stringFields.sort(
+          (a, b) =>
+            (b.topValues?.[0]?.count || 0) - (a.topValues?.[0]?.count || 0),
+        )[0],
+      },
+    };
+  }, [data]);
+
+  if (!analysis || !data.length) {
+    return null;
+  }
+
+  return (
+    <div className="grid grid-cols-4 gap-4">
+      <StatsCard
+        title="Records"
+        value={analysis.stats.totalRecords.toLocaleString()}
+        subtitle={"dataset"}
+      />
+      <StatsCard
+        title="Fields"
+        value={analysis.stats.totalFields}
+        subtitle={`${analysis.stats.numericFields} numeric, ${analysis.stats.stringFields} text`}
+      />
+      <StatsCard
+        title="Categories"
+        value={analysis.fieldAnalyses
+          .reduce((sum, f) => sum + f.uniqueCount, 0)
+          .toLocaleString()}
+        subtitle="unique values total"
+      />
+      <StatsCard
+        title="Completeness"
+        value={`${Math.round((1 - analysis.fieldAnalyses.reduce((sum, f) => sum + f.nullCount, 0) / (data.length * analysis.stats.totalFields)) * 100)}%`}
+        subtitle="complete fields"
+      />
+    </div>
+  );
+};
+
 export const ProactiveDataAnalysis = ({
   data,
   fileName,
@@ -389,32 +453,6 @@ export const ProactiveDataAnalysis = ({
 
   return (
     <div className="space-y-12">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <StatsCard
-          title="Records"
-          value={analysis.stats.totalRecords.toLocaleString()}
-          subtitle={"dataset"}
-        />
-        <StatsCard
-          title="Fields"
-          value={analysis.stats.totalFields}
-          subtitle={`${analysis.stats.numericFields} numeric, ${analysis.stats.stringFields} text`}
-        />
-        <StatsCard
-          title="Categories"
-          value={analysis.fieldAnalyses
-            .reduce((sum, f) => sum + f.uniqueCount, 0)
-            .toLocaleString()}
-          subtitle="unique values total"
-        />
-        <StatsCard
-          title="Completeness"
-          value={`${Math.round((1 - analysis.fieldAnalyses.reduce((sum, f) => sum + f.nullCount, 0) / (data.length * analysis.stats.totalFields)) * 100)}%`}
-          subtitle="complete fields"
-        />
-      </div>
-
       {/* Data Analysis Explanation */}
       {analysis.aggregations.length > 0 && (
         <div className="max-w-xl">

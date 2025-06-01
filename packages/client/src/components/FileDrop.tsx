@@ -4,7 +4,7 @@ import { type JsonSchema, inferJsonSchema } from "@/utils/schema-inference";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DataInsights } from "./DataInsights";
 import { JsonViewer } from "./JsonViewer";
-import { ProactiveDataAnalysis } from "./ProactiveDataAnalysis";
+import { DataStats, ProactiveDataAnalysis } from "./ProactiveDataAnalysis";
 import { SchemaInspector } from "./SchemaInspector";
 import { Label } from "./typography";
 
@@ -396,6 +396,20 @@ export const FileDrop = ({
             </div>
           </div>
 
+          {/* Instant Overview */}
+          <div>
+            <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
+              Instant Overview
+            </div>
+            <DataStats
+              data={
+                Array.isArray(processedFile.data)
+                  ? (processedFile.data as Array<Record<string, unknown>>)
+                  : [processedFile.data as Record<string, unknown>]
+              }
+            />
+          </div>
+
           {/* Schema and Raw Data */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
@@ -416,10 +430,10 @@ export const FileDrop = ({
             </div>
           </div>
 
-          {/* Data Overview */}
+          {/* Data Insights */}
           <div>
             <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
-              Instant Overview
+              Data Insights
             </div>
             <ProactiveDataAnalysis
               data={
