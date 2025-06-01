@@ -140,6 +140,28 @@ export const JsonViewer = ({
     return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
   };
 
+  const getDepth = useCallback((value: unknown): number => {
+    if (value === null || typeof value !== "object") {
+      return 1;
+    }
+
+    let maxDepth = 1;
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        maxDepth = Math.max(maxDepth, 1 + getDepth(item));
+      }
+    } else {
+      for (const val of Object.values(value as Record<string, unknown>)) {
+        maxDepth = Math.max(maxDepth, 1 + getDepth(val));
+      }
+    }
+
+    return maxDepth;
+  }, []);
+
+  const depth = useMemo(() => getDepth(data), [data, getDepth]);
+
   const flattenData = useCallback(
     (value: unknown, name?: string, level = 0, path = "root"): JsonItem[] => {
       const getValueType = (val: unknown): string => {
@@ -241,16 +263,16 @@ export const JsonViewer = ({
       {(objectCount !== undefined || fileSize !== undefined) && (
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4">
           <div className="flex items-center gap-4 text-sm text-gray-600">
-            {objectCount !== undefined && (
-              <div>
-                <span className="font-medium">Objects:</span>{" "}
-                {objectCount.toLocaleString()}
-              </div>
-            )}
             {fileSize !== undefined && (
               <div>
                 <span className="font-medium">File Size:</span>{" "}
                 {formatBytes(fileSize)}
+              </div>
+            )}
+            {objectCount !== undefined && (
+              <div>
+                <span className="font-medium">Objects:</span>{" "}
+                {objectCount.toLocaleString()}
               </div>
             )}
             <div>
@@ -258,6 +280,9 @@ export const JsonViewer = ({
               <span className="ml-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded">
                 {Array.isArray(data) ? "array" : "object"}
               </span>
+            </div>
+            <div>
+              <span className="font-medium">Depth:</span> {depth}
             </div>
           </div>
         </div>

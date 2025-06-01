@@ -66,3 +66,12 @@ Build an LLM-assisted interface that helps users:
 - **Transparency**: Expose the schema, LLM responses, and config structures
 - **Pre-visualization**: Users can preview changes before applying them
 - **User Agency**: Every component is traceable to user input or dataset structure
+
+- Drop data
+- Retrieve schema
+- Semantic analysis of each property from schema (seeded with example values)
+
+- Typography: hierarchy, font, size, weight, color
+- Organization of info:
+
+- Visualize branching
